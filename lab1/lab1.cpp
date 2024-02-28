@@ -14,9 +14,6 @@ int main()
 
     Vector<Pair> elems;
 
-    // for(int i  = 0; i < 20; ++i) 
-    //     elems.push_back(i);
-
     while (std::cin >> key >> value)
     {
         elems.push_back( Pair(key, value) );

@@ -32,7 +32,6 @@ class Vector {
         Vector(int _size) : size(_size) {
             if(size <= 0) 
                 throw std::runtime_error("Error: Wrong given size");
-
             capacity = size * 2;
             buffer = new T[capacity];
         } 
@@ -51,6 +50,18 @@ class Vector {
         void push_back(T element);
 
         void pop_back();
+
+        // T top() {
+        //     return buffer[(head) % capacity];
+        // }
+
+        // void pop_front() {
+        //     ~buffer[(head)];
+        //     ++head;
+        //     --size;
+        //     if(!try_decrease_buffer()) 
+        //         throw std::runtime_error("Error: Can't decrease buffer");
+        // }
 
         T& operator[](const int& idx) {
             if(idx >= size) 
@@ -77,7 +88,6 @@ class Vector {
         iterator begin();
 
         iterator end();
-
 };
 
 template<class T> 
@@ -160,7 +170,7 @@ inline void Vector<T>::push_back(T element) {
     if(!try_increase_buffer()) 
         throw std::runtime_error("Error: Can't increase buffer");
 
-    buffer[size++] = element;          
+    buffer[size++] = element;       
 }
 
 template<class T>

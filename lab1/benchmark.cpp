@@ -1,6 +1,8 @@
 #include <iostream>
 #include <chrono>
 
+#include <algorithm>
+
 #include "sort.hpp"
 #include "vector.hpp"
 
@@ -21,8 +23,9 @@ int main()
     while (std::cin >> key >> value)
     {
         input.push_back( Pair(key, value) );
+        input_stl.push_back(Pair(key, value));
     }
-    input_stl = input;
+    // input_stl = input;
 
     std::cout << "Count of lines is " << input.get_size() << std::endl;
 
@@ -34,7 +37,7 @@ int main()
 
     // Измеряем время работы stl сортировки.
     start_ts = std::chrono::system_clock::now();
-    std::stable_sort(std::begin(input_stl), std::end(input_stl));
+    std::stable_sort(input_stl.begin(), input_stl.end());
     end_ts = std::chrono::system_clock::now();
 
     uint64_t stl_sort_ts = std::chrono::duration_cast<duration_t>( end_ts - start_ts ).count();
