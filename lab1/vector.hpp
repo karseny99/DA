@@ -4,6 +4,50 @@
 
 const int min_capacity = 5;
 
+template <class ItemType, class ArrayType>
+class ArrayIterator
+{
+private:
+    ArrayType *array;
+    int index;
+    int size;
+
+
+public:
+    ArrayIterator(ArrayType *value, int i, int s) : array(value), index(i), size(s){};
+
+    ItemType& operator*()
+    {
+        if (index >= size)
+                throw std::logic_error("Error: wrong index " + std::to_string(index) + " in vector of size " + std::to_string(size));
+        return (*array)[index];
+    }
+
+    ItemType* operator->()
+    {
+        if (index >= size)
+                throw std::logic_error("Error: wrong index " + std::to_string(index) + " in vector of size " + std::to_string(size));
+        return (*array)[index];
+    }
+
+    bool operator!=(ArrayIterator<ItemType, ArrayType> const &other) const
+    {
+        return (other.index != index) || (other.array != array);
+    }
+
+    bool operator==(ArrayIterator<ItemType, ArrayType> const &other) const
+    {
+        return (other.index == index) && (other.array == array);
+    }
+    
+    ArrayIterator<ItemType, ArrayType> &operator++()
+    {
+        ++index;
+        return *this;
+    }
+
+};
+
 template<class T>
 class Vector {
     private:
@@ -83,45 +127,22 @@ class Vector {
             return size;
         }
 
+        int get_capacity() const {
+            return capacity;
+        }
+
         class iterator;
 
-        iterator begin();
+        ArrayIterator<T, Vector<T>> begin() {
+            return ArrayIterator<T, Vector<T>>(this, 0, size);
+        }
 
-        iterator end();
+        ArrayIterator<T, Vector<T>> end() {
+            return ArrayIterator<T, Vector<T>>(this, size, size);
+        }
+
 };
 
-template<class T> 
-class Vector<T>::iterator {
-    private:
-        T* cur;
-    public:
-        iterator(T* p) : cur(p) {}
-
-        iterator& operator++() {
-            ++cur;
-            return *this;
-        }
-
-        iterator& operator--() {
-            --cur;
-            return *this;
-        }
-
-        T& operator*()
-        {
-            return *cur;
-        }
-
-        bool operator==(const iterator& b) const
-        {
-            return *cur == *b.cur;
-        }
-
-        bool operator!=(const iterator& b) const
-        {
-            return *cur != *b.cur;
-        }
-};
 
 
 template<class T>
@@ -181,14 +202,3 @@ inline void Vector<T>::pop_back() {
     ~buffer[size--];
 }
 
-template<class T>
-inline typename Vector<T>::iterator Vector<T>::begin()
-{	
-	return Vector<T>::iterator(&buffer[0]);
-}
-
-template<class T>
-inline typename Vector<T>::iterator Vector<T>::end()
-{	
-	return Vector<T>::iterator(&buffer[size]);
-}

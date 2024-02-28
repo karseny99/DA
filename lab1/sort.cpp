@@ -10,7 +10,7 @@ namespace sort
 
 void radix_sort( Vector<Pair>& elems ) {
     
-    if(elems.get_size() == 1 or elems.empty())
+    if(elems.empty())
         return;
 
     for(int i = key_length - 1; i >= 0; --i) {
@@ -20,7 +20,7 @@ void radix_sort( Vector<Pair>& elems ) {
     
 }
 
-void counting_sort( Vector<Pair> &elems, int idx )
+void counting_sort( Vector<Pair>& elems, int idx )
 {
 
     if(idx < 0) 
@@ -49,7 +49,7 @@ void counting_sort( Vector<Pair> &elems, int idx )
     } 
     
     Vector<Pair> result( elems.get_size() );
-    for (int i = elems.get_size()-1; i >= 0; --i ) {
+    for (int i = elems.get_size() - 1; i >= 0; --i ) {
         int key;
         if('0' <= elems[i].first[idx] and elems[i].first[idx] <= '9')
             key = elems[i].first[idx] - '0';

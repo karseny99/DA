@@ -7,6 +7,8 @@
  * int -- ключ;
  * std::string -- значение;
  */
+
+
 int main()
 {
     std::string key;
