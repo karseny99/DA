@@ -23,24 +23,18 @@ void radix_sort( Vector<Pair>& elems ) {
 void counting_sort( Vector<Pair>& elems, int idx )
 {
 
-    if(idx < 0) 
+    if(idx < 0) {
         throw std::logic_error("Error: wrong index " + idx);
-
-    if (elems.empty())
-    {
-        return;
-    } 
+    }
 
 
     Vector<int> tmp(array_digit_size, 0);
-
     for (int i = 0; i < elems.get_size(); ++i) {
-        if('0' <= elems[i].first[idx] and elems[i].first[idx] <= '9')
+        if('0' <= elems[i].first[idx] and elems[i].first[idx] <= '9') {
             ++tmp[elems[i].first[idx] - '0'];
-        else if('a' <= elems[i].first[idx] and elems[i].first[idx] <= 'f')
+        } else {
             ++tmp[elems[i].first[idx] - 'a' + 10];
-        else 
-            throw std::logic_error("Error: wrong hex digit " + elems[i].first[idx]);
+        }
     }
 
     
@@ -51,19 +45,20 @@ void counting_sort( Vector<Pair>& elems, int idx )
     Vector<Pair> result( elems.get_size() );
     for (int i = elems.get_size() - 1; i >= 0; --i ) {
         int key;
-        if('0' <= elems[i].first[idx] and elems[i].first[idx] <= '9')
+        if('0' <= elems[i].first[idx] and elems[i].first[idx] <= '9') {
             key = elems[i].first[idx] - '0';
-        else    
+        } else {
             key = elems[i].first[idx] - 'a' + 10;
+        }    
 
         int pos = tmp[key]--;
-        // if(pos >= elems.get_size()) 
         result[pos-1] = elems[i];
     }
 
     int i = 0;
-    for(auto el : result) 
+    for(auto el : result) {
         elems[i++] = el;
+    }
     // std::swap(elems, result);
 }
 

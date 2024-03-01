@@ -4,21 +4,6 @@
 
 const int min_capacity = 5;
 
-// exception definitions
-class VectorpingDoesntExist : public std::exception {
-public:
-	virtual const char* what() const throw() {
-		return "Vectorping for key was not found!\n";
-	}
-};
-class VectorpingAlreadyExists : public std::exception {
-public:
-	virtual const char* what() const throw() {
-		return "Key already exists";
-	}
-};
-
-
 template <class T>
 class Vector {
 private:
@@ -35,30 +20,25 @@ private:
 public:
 
     T* buffer = nullptr;
-	/* 
-	Class declarations
-	*/
 	class iterator;
-	class const_iterator;
-
+	// class const_iterator;
 
 	//Beginning of iterator
 	class iterator {
 	private:
-		int idx;
-        int size;
 		Vector<T>* vector;
+        T* current;
 
 	public:
 
 		iterator() :
-			idx(0), vector(NULL), size(0) {}
+			vector(nullptr), current(nullptr) {}
 
-		iterator(Vector<T>* vectorPtr, int _idx, int _size):
-			idx(_idx), vector(vectorPtr), size(_size) {}
+		iterator(Vector<T>* vectorPtr, T* current):
+			vector(vectorPtr), current(current) {}
 
 		iterator(Vector<T>::iterator& sIterator): 
-			idx(sIterator.idx),	vector(sIterator.vector), size(sIterator.size) {
+			vector(sIterator.vector), current(sIterator.current) {
 		}
 
 
@@ -74,36 +54,36 @@ public:
 	};
 
 
-	class const_iterator {
-	private:
-		int idx;
-        int size;
-		const Vector<T>* vector;
+	// class const_iterator {
+	// private:
+	// 	int idx;
+    //     int size;
+	// 	const Vector<T>* vector;
 
-	public:
+	// public:
 
-		const_iterator() :
-			idx(0), vector(NULL), size(0) {}
+	// 	const_iterator() :
+	// 		idx(0), vector(NULL), size(0) {}
 
-		const_iterator(const Vector<T>* VectorPtr, int _idx, int _size):
-			idx(_idx), vector(VectorPtr), size(_size) {}
+	// 	const_iterator(const Vector<T>* VectorPtr, int _idx, int _size):
+	// 		idx(_idx), vector(VectorPtr), size(_size) {}
 
-		const_iterator(const Vector<T>::const_iterator& sIterator): 
-			idx(sIterator.idx),	vector(sIterator.vector), size(sIterator.size) {}
+	// 	const_iterator(const Vector<T>::const_iterator& sIterator): 
+	// 		idx(sIterator.idx),	vector(sIterator.vector), size(sIterator.size) {}
 
-		const_iterator(const Vector<T>::iterator& sIterator):
-			idx(sIterator.idx), vector(sIterator.vector), size(sIterator.size) {}
+	// 	const_iterator(const Vector<T>::iterator& sIterator):
+	// 		idx(sIterator.idx), vector(sIterator.vector), size(sIterator.size) {}
 
 		
-		const_iterator& operator=(const const_iterator& sIterator);
-		const_iterator& operator++(); 
-		const_iterator& operator--(); 
-		bool operator==(const const_iterator& sIterator) const;
-		bool operator!=(const const_iterator& sIterator) const;
-		const T operator*() const;
+	// 	const_iterator& operator=(const const_iterator& sIterator);
+	// 	const_iterator& operator++(); 
+	// 	const_iterator& operator--(); 
+	// 	bool operator==(const const_iterator& sIterator) const;
+	// 	bool operator!=(const const_iterator& sIterator) const;
+	// 	const T operator*() const;
 
-		friend class Vector;
-	};
+	// 	friend class Vector;
+	// };
 
 
     Vector() : capacity(min_capacity), size(0) {
@@ -136,8 +116,8 @@ public:
     } 
 
 
-	Vector::const_iterator begin() const;
-	Vector::const_iterator end() const;
+	// Vector::const_iterator begin() const;
+	// Vector::const_iterator end() const;
 	Vector::iterator begin();
 	Vector::iterator end();
     void push_back(T element);
@@ -173,30 +153,29 @@ public:
 /*
 Vector methods and operators
 */ 
-template<class T>
-typename Vector<T>::const_iterator Vector<T>::begin() const {
-	Vector::const_iterator iterator;
-	iterator.vector = this;
-    iterator.idx = 0;
-    iterator.size = this->size;
-	return iterator;
-}
+// template<class T>
+// typename Vector<T>::const_iterator Vector<T>::begin() const {
+// 	Vector::const_iterator iterator;
+// 	iterator.vector = this;
+//     iterator.idx = 0;
+//     iterator.size = this->size;
+// 	return iterator;
+// }
 
-template<class T>
-typename Vector<T>::const_iterator Vector<T>::end() const {
-	Vector::const_iterator iterator;
-	iterator.vector = this;
-    iterator.idx = size;
-    iterator.size = this->size;
-	return iterator;
-}
+// template<class T>
+// typename Vector<T>::const_iterator Vector<T>::end() const {
+// 	Vector::const_iterator iterator;
+// 	iterator.vector = this;
+//     iterator.idx = size;
+//     iterator.size = this->size;
+// 	return iterator;
+// }
 
 template <class T>
 typename Vector<T>::iterator Vector<T>::begin() {
 	Vector::iterator iterator;
 	iterator.vector = this;
-    iterator.idx = 0;
-    iterator.size = this->size;
+    iterator.current = this->buffer;
 	return iterator;
 }
 
@@ -204,84 +183,81 @@ template<class T>
 typename Vector<T>::iterator Vector<T>::end() {
 	Vector::iterator iterator;
 	iterator.vector = this;
-    iterator.idx = size;
-    iterator.size = this->size;
+    iterator.current = &(this->buffer[this->size]);
 	return iterator;
 }
 
 template <class T>
 typename Vector<T>::iterator& Vector<T>::iterator::operator=(const Vector<T>::iterator& sIterator) {
-	idx = sIterator.idx;
-    size = sIterator.size;
+    current = sIterator.current;
 	vector = sIterator.vector;
-    return *this;
 }
 
 template <class T>
 typename Vector<T>::iterator& Vector<T>::iterator::operator++() {
-	++idx;
+	++current;
 	return *this;
 }
 
 template <class T>
 typename Vector<T>::iterator& Vector<T>::iterator::operator--() {
-	--idx;
+	--current;
 	return *this;
 }
 
-template <class T>
-typename Vector<T>::iterator& Vector<T>::iterator::operator-(const Vector<T>::iterator& sIterator) {
-	idx -= sIterator.idx;
-	return *this;
-}
+// template <class T>
+// typename Vector<T>::iterator& Vector<T>::iterator::operator-(const Vector<T>::iterator& sIterator) {
+// 	idx -= sIterator.idx;
+// 	return *this;
+// }
 
 template <class T>
 bool Vector<T>::iterator::operator==(const Vector<T>::iterator& sIterator) const {
-	return (idx == sIterator.idx) and (vector == sIterator.vector) and (size == sIterator.size);
+	return (vector == sIterator.vector) and (current == sIterator.current);
 }
 
 template <class T>
 bool Vector<T>::iterator::operator!=(const Vector<T>::iterator& sIterator) const {
-	return !(idx == sIterator.idx) or !(vector == sIterator.vector) or !(size == sIterator.size);
+	return !(vector == sIterator.vector) or !(current == sIterator.current);
 }
 
 template <class T>
 const T Vector<T>::iterator::operator*() const {
-	return vector->buffer[idx];
+	return *current;
 }
 
-template <class T>
-typename Vector<T>::const_iterator& Vector<T>::const_iterator::operator=(const Vector<T>::const_iterator& sIterator) {
-	idx = sIterator.idx;
-	vector = sIterator.vector;
-	size = sIterator.size;
-}
+// template <class T>
+// typename Vector<T>::const_iterator& Vector<T>::const_iterator::operator=(const Vector<T>::const_iterator& sIterator) {
+// 	idx = sIterator.idx;
+// 	vector = sIterator.vector;
+// 	size = sIterator.size;
+// }
 
-template <class T>
-typename Vector<T>::const_iterator& Vector<T>::const_iterator::operator++() {
-	++idx;
-	return *this;
-}
-template <class T>
-typename Vector<T>::const_iterator& Vector<T>::const_iterator::operator--() {
-	--idx;
-	return *this;
-}
+// template <class T>
+// typename Vector<T>::const_iterator& Vector<T>::const_iterator::operator++() {
+// 	++idx;
+// 	return *this;
+// }
+// template <class T>
+// typename Vector<T>::const_iterator& Vector<T>::const_iterator::operator--() {
+// 	--idx;
+// 	return *this;
+// }
 
-template <class T>
-bool Vector<T>::const_iterator::operator==(const Vector<T>::const_iterator& sIterator) const {
-	return (idx == sIterator.idx) and (vector == sIterator.vector) and (size == sIterator.size);
-}
+// template <class T>
+// bool Vector<T>::const_iterator::operator==(const Vector<T>::const_iterator& sIterator) const {
+// 	return (idx == sIterator.idx) and (vector == sIterator.vector) and (size == sIterator.size);
+// }
 
-template <class T>
-bool Vector<T>::const_iterator::operator!=(const Vector<T>::const_iterator& sIterator) const {
-	return !(idx == sIterator.idx) or !(vector == sIterator.vector) or !(size == sIterator.size);
-}
+// template <class T>
+// bool Vector<T>::const_iterator::operator!=(const Vector<T>::const_iterator& sIterator) const {
+// 	return !(idx == sIterator.idx) or !(vector == sIterator.vector) or !(size == sIterator.size);
+// }
 
-template <class T>
-const T Vector<T>::const_iterator::operator*() const {
-	return vector->buffer[idx];
-}
+// template <class T>
+// const T Vector<T>::const_iterator::operator*() const {
+// 	return vector->buffer[idx];
+// }
 
 
 template<class T>
