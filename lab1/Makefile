@@ -1,5 +1,5 @@
 CC=g++
-FLAGS=-std=c++20 
+FLAGS=-std=c++20 -pedantic -Wall -Wextra -Wno-unused-variable 
 OUTPUT=lab1
 
 all: sort.o lab1.cpp

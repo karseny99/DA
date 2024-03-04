@@ -1,0 +1,42 @@
+#! /usr/bin/env bash
+
+readonly TEST_DIR=$(pwd)/tests
+
+function log_info() {
+    local message=${1}
+    _log "INFO" "${message}"
+}
+
+function _log() {
+    local message=${1}
+    local now=$( gdate +"%Y%m%d %H:%M:%S")
+    echo "[${level}] [${now}] ${message}"
+}
+
+function log_error() {
+    local message=${1}
+    _log "ERR" "${message}"
+}
+
+function main() {
+    log_info "Start"
+    log_info "Stage #1. Compiling..."
+    if !make ; then
+        log_error "Failed to compile"
+        return 1
+    fi
+
+    log_info "Stage #2. Test generating..."
+    rm -rf ${TEST_DIR}
+    mkdir ${TEST_DIR}
+    if ! ./testGenerator.py ; then 
+        log_error "Failed to generate tests."
+        return 1
+    fi
+
+    log_info "Stage #3. Checking..."
+
+
+}
+
+main ${@}
