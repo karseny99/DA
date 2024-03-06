@@ -1,0 +1,118 @@
+\section{Описание}
+Поразрядная сортировка подразумевает применение сортировки подсчетом по каждому разряду элемента последовательности. 
+
+Для оценки сложности поразрядной сортировки вспомним сложность сортировки подсчетом: $\Theta(n + k)$, где n - количество элементов последовательности, а k - максимум этой последовательности. 
+Поскольку мы запускаем сортировку подсчетом для каждого знака ключа, то получаем, что оценка поразрядной сортировки равна $O(n * l)$, где n - количество элементов, а l - количество разрядов. 
+
+
+\pagebreak
+
+\section{Исходный код}
+На каждой непустой строке входного файла располагается пара \enquote{ключ-значение}, поэтому создадим новую 
+структуру {\ttfamily TValue}, в которой будем хранить ключ в виде статического массива  {\ttfamily char[]} и значение в виде числа типа {\ttfamily int64\_t}. 
+
+\begin{lstlisting}[language=C]
+#include <string>
+
+const int array_digit_size = 16;
+const int key_length = 32;
+
+class TValue {   
+public:
+    char key[key_length];
+    uint64_t value; 
+
+    TValue() = default;
+    ~TValue() = default;
+    
+    TValue(std::string& _key, uint64_t _value) {
+        for(int i = 0; i < key_length; ++i) 
+            key[i] = _key[i];
+
+        value = _value;
+    }
+    
+    void set(std::string& _key, uint64_t _value) {
+
+        for(int i = 0; i < key_length; ++i) 
+            key[i] = _key[i];
+
+        value = _value;
+    }
+};
+
+\end{lstlisting}
+
+В файле \textbf{sort.cpp} находится реализация поразрядной сортировки. \\
+Здесь в цикле происходит запуск сортировки подсчетом для каждого знака ключа. По окончанию сортировки подсчетом для i-го разряда происходит обмен буферами вспомогательного и результирующего векторов.
+
+\begin{lstlisting}[language=C]
+#include "sort.hpp"
+#include <iostream>
+
+
+namespace sort {
+
+    const int array_digit_size = 16;
+    const int key_length = 32;
+
+    void radix_sort( vector::Vector<TValue>& elems ) {
+
+        vector::Vector<TValue> tmpResult(elems.get_size() + 1, true);
+
+        for(int j = key_length - 1; j >= 0; --j) {
+
+            int tmp[16];
+            for(int k = 0; k < array_digit_size; ++k) 
+                tmp[k] = 0;
+            
+
+            for(int i = 0; i < elems.get_size(); ++i) {
+                if('0' <= elems[i].key[j] and elems[i].key[j] <= '9')
+                    ++tmp[elems[i].key[j] - '0'];
+                else 
+                    ++tmp[elems[i].key[j] - 'a' + 10];
+            }
+
+            for(int k = 1; k < 16; ++k) {
+                tmp[k] += tmp[k - 1];
+            }
+
+            for(int i = elems.get_size() - 1; i >= 0; --i) {
+                int key;
+                if('0' <= elems[i].key[j] and elems[i].key[j] <= '9')
+                    key = elems[i].key[j] - '0';
+                else    
+                    key = elems[i].key[j] - 'a' + 10;
+
+                int pos = tmp[key]--;
+                tmpResult[pos-1] = elems[i];
+            }
+            vector::swap(elems, tmpResult);
+        }
+
+        tmpResult.~Vector();
+    }
+}
+\end{lstlisting}
+
+\pagebreak
+
+\section{Консоль}
+\begin{alltt}
+karseny99@karseny99:/mnt/study/DA/lab1$ make
+g++ -std=c++20  -c sort.cpp
+g++ -std=c++20  sort.o lab1.cpp -o lab1
+karseny99@karseny99:/mnt/study/DA/lab1$ ./lab1 < tests/02.t
+11b3a318b750add4482f67160fd1c7af        5506620685087310468
+2904a441415ad22c0ccbc8bab780ff01        15631025563904442920
+2d57ead15d45f3b95217fc26f64e624f        17967741058834373087
+5fb9cc898b5dc6ca6478b0f61ca58579        15549767237243378484
+7d685d1f631b298beb848e4845e7d70b        13093843595709548303
+88f32327a698e79035ea91b25c9fe79f        1522945456683991812
+9ebaa12c5c594e3c6cf597c586120fc3        1741633272260555417
+c23fe20a6b98698e44b378628cb02624        14690737309650550198
+f2ad2b0ee93e3e0f8c94dac8b8181bf1        10823747237399279286
+f7b994993cd43e8a1e8bc567008a5c34        3420891951338888443
+\end{alltt}
+\pagebreak

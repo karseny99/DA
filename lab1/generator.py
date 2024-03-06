@@ -2,7 +2,7 @@ import sys
 import random
 import string
 
-TEST_COUNT = 6
+TEST_COUNT = 8
 
 def get_random_MD5():
     length = 32

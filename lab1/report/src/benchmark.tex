@@ -1,0 +1,22 @@
+\section{Тест производительности}
+
+Производительность оценивается так: на один и тех же тестовых данных запускается поразрядная сортировка и встроенная сортировка в библиотеку C++. Тесты на $10^4$, $10^5$ и $10^6$ элементов.
+
+\begin{alltt}
+karseny99@karseny99:/mnt/study/DA/lab1\$ ./benchmark < tests/05.t
+Count of lines is 10000
+Counting sort time: 4977us
+STL stable sort time: 391us
+karseny99@karseny99:/mnt/study/DA/lab1\$ ./benchmark < tests/06.t
+Count of lines is 100000
+Counting sort time: 52848us
+STL stable sort time: 4873us
+karseny99@karseny99:/mnt/study/DA/lab1\$ ./benchmark < tests/07.t
+Count of lines is 1000000
+Counting sort time: 542384us
+STL stable sort time: 77753us
+
+Как видно, на всех тестах STL-сортировка выигрывает. Стабильная сортировка из STL имеет сложность \(\Theta\)(n*log_n), но, хотя поразрадная сортировка имеет линейную сложность, она все равно уступает. Так происходит из-за того, что константа в работе поразрядной сортировки довольна большая в сравнении с std::stable_sort(). Тем не менее, начиная с некоторого размера данных поразрядная сортировка выйдет победителем.
+\end{alltt}
+
+\pagebreak
