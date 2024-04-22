@@ -6,9 +6,8 @@ enum colors {
     BLACK
 };
 
-// template <class T>
+template <class pair>
 class RBTree {
-
     private:
         class Node {
             private:
@@ -21,50 +20,36 @@ class RBTree {
                 const std::string reset = "\033[0m";
 
             public:
+                // pair item;
+                long long value;
                 colors color = BLACK;
-                long long value;  
+                std::shared_ptr<Node> child[2];
+                // std::shared_ptr<Node> child[0];
+                // std::shared_ptr<Node> child[1];
 
-                std::shared_ptr<Node> leftChild;
-                std::shared_ptr<Node> rightChild;
-                std::shared_ptr<Node> parent;
-
-                Node(colors _color, long long _value, std::shared_ptr<Node> _left, std::shared_ptr<Node> _right, std::shared_ptr<Node> _parent) :
-                    color(_color), 
-                    value(_value),
-                    leftChild(_left),
-                    rightChild(_right),
-                    parent(_parent) {}
+                Node(colors _color, \
+                    long long _value, \
+                    std::shared_ptr<Node> _left, \
+                    std::shared_ptr<Node> _right) : 
+                        color(_color), 
+                        value(_value) {
+                            child[0] = _left;
+                            child[1] = _right;
+                        }
                 
                 ~Node() = default;
 
                 bool value_exists(long long _value) {
                     return (value == _value) or 
-                        (leftChild != nullptr and leftChild->value == _value) or 
-                        (rightChild != nullptr and rightChild->value == _value);
+                        (child[0] != nullptr and child[0]->value == _value) or 
+                        (child[1] != nullptr and child[1]->value == _value);
                 }   
-
-                std::shared_ptr<Node> get_uncle() {
-                    std::shared_ptr<Node> grandParent = parent->parent;
-                    if(!grandParent)    
-                        return nullptr;
-                    return (grandParent->rightChild != parent) ? grandParent->rightChild : grandParent->leftChild;
-                }
-
-                std::shared_ptr<Node> get_root() {
-                    if(!parent) 
-                        return std::make_shared<Node>(*this);
-                    auto mover = parent;
-                    while(mover->parent != nullptr) {
-                        mover = mover->parent;
-                    }
-                    return mover;
-                }
-
+                
                 void print(int space = 0) {
                     space += 2;
 
-                    if(rightChild)
-                        rightChild->print(space);
+                    if(child[1])
+                        child[1]->print(space);
                     for(int i = SPACES_COUNT; i < space; ++i) {
                         std::cout << ' ' ;
                     }
@@ -73,371 +58,240 @@ class RBTree {
                     else 
                         std::cout << value << std::endl;
                         
-                    if(leftChild)
-                        leftChild->print(space);
+                    if(child[0])
+                        child[0]->print(space);
                 }
+
+                bool has_no_children() {
+                    return (child[0] == nullptr) and (child[1] == nullptr);
+                }
+
+                bool has_one_child() {
+                    return  (child[0] != nullptr) ^ (child[1] != nullptr);
+                }
+
+                bool has_two_children() {
+                    return (child[0] != nullptr) and (child[1] != nullptr);
+                }
+
 
         };
 
         std::shared_ptr<Node> root = nullptr;
-    public: 
 
-        RBTree() = default;
-
-        RBTree(long long _value) {
-            root = std::make_shared<Node>(BLACK, _value, nullptr, nullptr, nullptr);
+        bool is_red(std::shared_ptr<Node> node) const {
+            return (node != nullptr and node->color == RED);
         }
 
-        bool isEmpty() const {
-            return root == nullptr;
+        bool is_black(std::shared_ptr<Node> node) const {
+            return (node == nullptr or node->color == BLACK);
+        }
+        
+
+        std::shared_ptr<Node> rotate(std::shared_ptr<Node> currentRoot, bool direction) { // left / right
+            std::shared_ptr<Node> newRoot = currentRoot->child[!direction];
+
+            currentRoot->child[!direction] = newRoot->child[direction];
+            newRoot->child[direction] = currentRoot;
+
+            newRoot->color = currentRoot->color;
+            currentRoot->color = RED;
+
+            return newRoot;
+        }    
+
+        std::shared_ptr<Node> doubleRotate(std::shared_ptr<Node> currentRoot, bool direction) {
+            currentRoot->child[!direction] = rotate(currentRoot->child[!direction], !direction);
+            return rotate(currentRoot, direction);
         }
 
-    private:
-
-        void rotate_right(std::shared_ptr<Node> oldRoot) { 
-            std::cout << "----> Right rotate " << oldRoot->value << std::endl;
-
-            auto newRoot = oldRoot->leftChild;
-            oldRoot->leftChild = newRoot->rightChild;
-
-            if(oldRoot->leftChild) 
-                oldRoot->leftChild->parent = oldRoot;
-            
-            newRoot->parent = oldRoot->parent;
-
-            if(oldRoot->parent == nullptr) 
-                root = newRoot;
-            else if(oldRoot == oldRoot->parent->leftChild) 
-                oldRoot->parent->leftChild = newRoot;
-            else 
-                oldRoot->parent->rightChild = newRoot;
-            
-            newRoot->rightChild = oldRoot;
-            oldRoot->parent = newRoot;          
+        // sets opposite color to root and its children
+        void change_colors(std::shared_ptr<Node> node) { 
+            node->color = static_cast<colors>(!node->color);
+            if(node->child[0])
+                node->child[0]->color = static_cast<colors>(!node->child[0]->color);
+            if(node->child[1])
+                node->child[1]->color = static_cast<colors>(!node->child[1]->color);
         }
 
-        void rotate_left(std::shared_ptr<Node> oldRoot) { 
-            std::cout << "----> Left rotate " << oldRoot->value << std::endl;
-
-            auto newRoot = oldRoot->rightChild;
-            oldRoot->rightChild = newRoot->leftChild;
-
-            if(oldRoot->rightChild) 
-                oldRoot->rightChild->parent = oldRoot;
+        std::shared_ptr<Node> check_add_correctness(std::shared_ptr<Node> localRoot, bool direction) {
             
-            newRoot->parent = oldRoot->parent;
+            if(is_red(localRoot->child[direction])) {
+                
+                // parent is red, uncle is red -> simply switch colors
+                if(is_red(localRoot->child[!direction])) {
+                    if(is_red(localRoot->child[direction]->child[direction]) or is_red(localRoot->child[direction]->child[!direction])) {
+                        std::cout << "->Uncle is red, changing colors" << std::endl;
+                        change_colors(localRoot); 
+                    }
 
-            if(oldRoot->parent == nullptr) 
-                root = newRoot;
-            else if(oldRoot == oldRoot->parent->leftChild) 
-                oldRoot->parent->leftChild = newRoot;
-            else 
-                oldRoot->parent->rightChild = newRoot;
-            
-            newRoot->leftChild = oldRoot;
-            oldRoot->parent = newRoot;    
-        }
-
-
-        std::shared_ptr<Node> search(long long _value) {
-            std::shared_ptr<Node> currentNode = root;
-            std::shared_ptr<Node> prevNode = nullptr;
-
-            while(currentNode != nullptr) {
-                if(currentNode->value == _value) {
-                    break;
-                } else if(currentNode->value < _value) {
-                    prevNode = currentNode;
-                    currentNode = currentNode->rightChild;
+                // parent is red, uncle is black -> need rotate
                 } else {
-                    prevNode = currentNode;
-                    currentNode = currentNode->leftChild;
-                }
-            }
+                    // order is right
+                    if(is_red(localRoot->child[direction]->child[direction])) {
+                        std::cout << "->Uncle is black, rotating" << std::endl;
 
-            // root-case
-            if(prevNode == nullptr)
+                        localRoot = rotate(localRoot, !direction);
+                    // order is wrong, need to rotate twice
+                    } else if(is_red(localRoot->child[direction]->child[!direction])) {
+                        std::cout << "->Uncle is black, rotating" << std::endl;
+
+                        localRoot = doubleRotate(localRoot, !direction);
+                    }
+                }
+                
+            } 
+
+            return localRoot;
+        } 
+
+        std::shared_ptr<Node> _insert(std::shared_ptr<Node> currentNode, long long value, bool& is_found) {
+
+            if(currentNode == nullptr) 
+                return std::make_shared<Node>(RED, value, nullptr, nullptr);
+
+            if(currentNode->value == value) {
+                is_found = true;
                 return currentNode;
-            return prevNode;
-        }
-
-        void check_add_correctness(std::shared_ptr<Node> currentNode) { // private
-            std::cout << "-----------------" << std::endl;
-            print(this);
-            std::cout << "-----------------" << std::endl;
-
-
-            if(currentNode->parent->color == BLACK) {
-                std::cout << "-->Don't need to balance tree, parent is black\n";
-
-            } else if(currentNode->get_uncle() == nullptr or currentNode->get_uncle()->color == BLACK) {
-
-                if(currentNode->get_uncle() != nullptr)
-                    std::cout << "-->Need to balance, uncle is black(" << currentNode->get_uncle()->value << ")\n";
-                else 
-                    std::cout << "-->Need to balance, uncle is black\n";
-                
-                auto grandParent = currentNode->parent->parent;
-                if(grandParent->rightChild == currentNode->get_uncle()) {
-                    if(currentNode->parent->rightChild == currentNode) {
-                        std::cout << "--->I'm a right node, need to swap\n";
-                        rotate_left(currentNode->parent);
-                        currentNode = currentNode->leftChild;
-                    }
-                    std::swap(currentNode->parent->color, currentNode->parent->parent->color);
-                    rotate_right(grandParent);
-                    root = currentNode->get_root();
-                    std::cout << "-----------------" << std::endl;
-                    print(this);
-                    std::cout << "-----------------" << std::endl;
-                } else {
-                    if(currentNode->parent->leftChild == currentNode) {
-                        std::cout << "--->I'm a left node, need to swap\n";
-                        rotate_right(currentNode->parent);
-                        currentNode = currentNode->rightChild;
-                    }
-                    std::swap(currentNode->parent->color, currentNode->parent->parent->color);
-                    rotate_left(grandParent);
-                    std::cout << "================= " << std::endl;
-                    print(this);
-                    std::cout << "================= " << std::endl;
-                }
-
-            } else if(currentNode->get_uncle() != nullptr and currentNode->get_uncle()->color == RED) {
-                std::cout << "-->Need to balance, parent is red, uncle is red\n";
-                currentNode->parent->color = BLACK;
-                std::swap(currentNode->get_uncle()->color, currentNode->parent->parent->color);
-                if(currentNode->parent->parent->parent != nullptr and currentNode->parent->parent->parent->color == RED) {
-                    check_add_correctness(currentNode->parent->parent);
-                }
-
             }
 
-            root = currentNode->get_root();
-            std::cout << "Root is " << root->value << std::endl;
-            root->color = BLACK;
-        }
+            bool direction = (value > currentNode->value);
+            currentNode->child[direction] = _insert(currentNode->child[direction], value, is_found);
 
-        void check_remove_correctness(std::shared_ptr<Node> currentNode) {
-            while(currentNode != root and currentNode->color == BLACK) {
-                
-                // I'm a left child
-                if(currentNode->parent->leftChild == currentNode) {
-                    auto brother = currentNode->parent->rightChild;
-
-                    // brother is red
-                    if(brother->color == RED) {
-                        brother->color = BLACK;
-                        currentNode->parent->color = RED;
-                        rotate_left(currentNode->parent);
-                    
-                    // brother is black, his children are black
-                    } else if(brother->color == BLACK and 
-                        ((brother->leftChild == nullptr and brother->rightChild == nullptr) 
-                            or (brother->leftChild != nullptr and brother->leftChild->color == BLACK
-                                    and brother->rightChild != nullptr and brother->rightChild->color == BLACK))) 
-                    {
-                        brother->color = RED;
-                        currentNode = currentNode->parent;
-                                        
-                    // brother is black, brother->left (red) and brother->right (black) 
-                    } else {
-                        if(brother->color == BLACK and brother->leftChild->color == RED and (brother->rightChild == nullptr or brother->rightChild->color == BLACK)) {
-                            brother->leftChild->color = BLACK;
-                            brother->color = RED;
-                            rotate_right(brother);
-                            brother = currentNode->parent->rightChild;
-                        }
-                        brother->color = currentNode->parent->color;
-                        currentNode->parent->color = BLACK;
-                        brother->rightChild->color = BLACK;
-
-                        rotate_left(currentNode->parent);
-                        currentNode = root;
-                    }
-                    // brother is black, brother->right (red)
-                    // } else if(brother->color == BLACK and (brother->rightChild != nullptr and brother->rightChild->color == RED)) {
-                    // }
-                } else {
-                    auto brother = currentNode->parent->leftChild;
-                    // brother is red
-                    if(brother->color == RED) {
-                        brother->color = BLACK;
-                        currentNode->parent->color = RED;
-                        rotate_right(currentNode->parent);
-                    
-                    // brother is black, his children are black
-                    } else if(brother->color == BLACK and 
-                        ((brother->leftChild == nullptr and brother->rightChild == nullptr) 
-                            or (brother->leftChild != nullptr and brother->leftChild->color == BLACK
-                                    and brother->rightChild != nullptr and brother->rightChild->color == BLACK))) 
-                    {
-                        brother->color = RED;
-                        currentNode = currentNode->parent;
-                                        
-                    // brother is black, brother->left (red) and brother->right (black) 
-                    } else { 
-                        if(brother->color == BLACK and brother->leftChild->color == RED and (brother->rightChild == nullptr or brother->rightChild->color == BLACK)) {
-                            brother->leftChild->color = BLACK;
-                            brother->color = RED;
-                            rotate_left(brother);
-                            brother = currentNode->parent->rightChild;
-                        }
-                        brother->color = currentNode->parent->color;
-                        currentNode->parent->color = BLACK;
-                        brother->rightChild->color = BLACK;
-
-                        rotate_right(currentNode->parent);
-                        currentNode = root;
-                    // brother is black, brother->right (red)
-                    // } else if(brother->color == BLACK and (brother->rightChild != nullptr and brother->rightChild->color == RED)) {
-                    // }
-                    }
-
-                    std::cout << "================" << std::endl;
-                    print(this);
-                }
-            }
-            currentNode->color = BLACK;
-        }
-
-        void transplant(std::shared_ptr<Node> currentNode, std::shared_ptr<Node> child) {
-            // root-case
-            if(currentNode->parent == nullptr) {
-                root = child;
-            } else if(currentNode == currentNode->parent->leftChild) {
-                currentNode->parent->leftChild = child;
-            } else {
-                currentNode->parent->rightChild = child;
-            }
-
-            if(child)
-                child->parent = currentNode->parent;
+            // if(is_found)
+            //     return currentNode;
+            return check_add_correctness(currentNode, direction);
         }
 
         std::shared_ptr<Node> get_minimum(std::shared_ptr<Node> currentRoot) {
-            if(currentRoot->leftChild == nullptr) {
-                return currentRoot;
-            } 
-
-            auto mover = currentRoot->leftChild;
-            while(mover->leftChild != nullptr) {
-                mover = mover->leftChild;
+            auto mover = currentRoot;
+            while(mover->child[0] != nullptr) {
+                mover = mover->child[0];
             }
 
             return mover;
         }
 
+        std::shared_ptr<Node> check_erase_correctness(std::shared_ptr<Node> currentNode, bool direction, bool& needBalance) {
+            std::shared_ptr<Node> parent = currentNode;
+            std::shared_ptr<Node> brother = currentNode->child[!direction];
+
+            if(is_red(brother)) {
+                currentNode = rotate(currentNode, direction);
+                brother = parent->child[!direction];
+            }
+
+            if(brother) {
+
+                if(is_black(brother->child[0]) and is_black(brother->child[1])) {
+
+                    if(is_red(parent)) needBalance = false;
+
+                    parent->color = BLACK;
+                    brother->color = RED;
+
+                } else {
+                    colors parentColor = parent->color;
+                    bool isRedBrotherReduction = (currentNode != parent);
+
+                    if(is_red(brother->child[!direction])) {
+                        parent = rotate(parent, direction);
+                    } else {
+                        parent = doubleRotate(parent, direction);
+                    }
+
+                    parent->color = parentColor;
+                    parent->child[0]->color = BLACK;
+                    parent->child[1]->color = BLACK;
+
+                    if(isRedBrotherReduction) {
+                        currentNode->child[direction] = parent;
+                    } else {
+                        currentNode = parent;
+                    }
+
+                    needBalance = false;
+                }
+            }
+            return currentNode;
+        }
+
+        std::shared_ptr<Node> _erase(std::shared_ptr<Node> currentNode, long long value, bool& needBalance, bool& erased) {
+
+            if(currentNode == nullptr)  {
+                needBalance = false;
+                erased = false;
+                return nullptr;
+            }
+
+            if(currentNode->value == value) {
+
+                // has zero or one child
+                if(currentNode->child[0] == nullptr or currentNode->child[1] == nullptr) {
+
+                    std::shared_ptr<Node> tmp;
+
+                    if(currentNode->child[0]) tmp = currentNode->child[0];
+                    if(currentNode->child[1]) tmp = currentNode->child[1];
+
+                    // If node is red, the black height is not changing -> don't need to do anything                
+                    if(is_red(currentNode)) {
+                        currentNode = nullptr;
+                        needBalance = false;
+                    
+                    // if node is black and its child is red -> simply replace colors;
+                    } else if(is_red(tmp)) {
+                        currentNode = nullptr;
+                        tmp->color = BLACK;
+                        needBalance = false;
+                    }
+
+                    return tmp;
+
+                // has two children, find minimum in right subtree and copy its value in currentNode, 
+                // then delete this minimum from right subtree
+                } else {
+                    std::shared_ptr<Node> tmp = get_minimum(currentNode->child[1]);
+                    std::cout << tmp->value << std::endl;
+
+                    currentNode->value = tmp->value;
+                    value = tmp->value;
+                }
+            }
+
+            bool direction = (value >= currentNode->value);
+            
+            currentNode->child[direction] = _erase(currentNode->child[direction], value, needBalance, erased);
+
+            return needBalance ? check_erase_correctness(currentNode, direction, needBalance) : currentNode;
+        } 
+
     public: 
 
-        std::shared_ptr<Node> find(long long _value) {
-            std::shared_ptr<Node> foundNode = search(_value);
-            if(!foundNode) 
-                return nullptr;
-            else if(foundNode->value == _value) 
-                return foundNode;
-            else if(foundNode->rightChild != nullptr and foundNode->rightChild->value == _value)
-                return foundNode->rightChild;
-            else if(foundNode->leftChild != nullptr and foundNode->leftChild->value == _value)
-                return foundNode->leftChild;
-            return nullptr;
+        bool insert(long long value) {
+            bool is_found = false;
+            root = _insert(root, value, is_found);
+            root->color = BLACK;
+            if(is_found)
+                return false;
+            return true;
         }
 
-
-        bool remove(long long _value) {
-            if(isEmpty()) 
-                return false;
-
-            std::shared_ptr<Node> foundParent = search(_value);
-            bool valueExists = foundParent->value_exists(_value);
-            if(!valueExists) {
-                return false;
-            }
-            
-            std::shared_ptr<Node> removeNode = foundParent;
-            if(foundParent->value < _value) {
-                removeNode = foundParent->rightChild;
-            } else if(foundParent->value > _value) {
-                removeNode = foundParent->leftChild;
-            }
-            std::cout << "-> Removing " << removeNode->value << std::endl;
-            colors removeColor = removeNode->color;
-           
-            std::shared_ptr<Node> successorNode;
-
-            if(removeNode->leftChild == nullptr) {
-                std::cout << "-->leftChild is null or children null " << std::endl;
-                successorNode = removeNode->rightChild;
-                transplant(removeNode, successorNode);
-            } else if(removeNode->rightChild == nullptr) {
-                std::cout << "-->Right child is null" << std::endl;
-                successorNode = removeNode->leftChild;
-                transplant(removeNode, successorNode);
-            } else {
-                std::cout << "-->Node has two children" << std::endl;
-
-                std::shared_ptr<Node> minimumNode = get_minimum(removeNode->rightChild);
-                removeColor = minimumNode->color;
-                successorNode = minimumNode->rightChild;
-
-                if(minimumNode->parent != removeNode) {
-                    transplant(minimumNode, minimumNode->rightChild);
-                    minimumNode->rightChild = removeNode->rightChild;
-                    minimumNode->rightChild->parent = minimumNode;
-                    transplant(removeNode, minimumNode);
-                }
-
-                transplant(removeNode, minimumNode);
-                minimumNode->leftChild = removeNode->leftChild;
-                minimumNode->leftChild->parent = minimumNode;
-                minimumNode->color = removeNode->color;
-
-            }
-            std::cout << "===========================" << std::endl;
-            print(this);
-            if(removeColor == BLACK) {
-                check_remove_correctness(successorNode);
-            } 
-            
-            return true;
-
-
+        bool erase(long long value) {
+            bool erased = true;
+            bool needBalanced = true;
+            root = _erase(root, value, needBalanced, erased);
+            if(root)
+                root->color = BLACK;
+            return erased;
         }
 
-        bool add(long long _value) {
-
-            if(isEmpty()) {
-                root = std::make_shared<Node>(BLACK, _value, nullptr, nullptr, nullptr);
-                return true;
-            }
-
-            std::shared_ptr<Node> foundParent = search(_value);
-            bool valueExists = foundParent->value_exists(_value);
-            if(valueExists) {
-                return false;
-            }
-            std::shared_ptr<Node> insertedNode = (_value > foundParent->value) ? foundParent->rightChild : foundParent->leftChild;
-            std::cout << "-> " << _value << std::endl;
-            insertedNode = std::make_shared<Node>(RED, _value, nullptr, nullptr, foundParent);
-            if(_value > foundParent->value) {
-                foundParent->rightChild = insertedNode;
-            } else {
-                foundParent->leftChild = insertedNode;
-            }
-
-            check_add_correctness(insertedNode);
-
-            std::cout << "-----> " <<  insertedNode->value << ' ' << insertedNode->parent->value << ' ' << std::endl;
-            return true;
-        }   
-
-        friend void print(RBTree* tree);
-
-
+        friend void print(RBTree<key_type, value_type>* tree);
 };
 
-
-void print(RBTree* tree) {
-    return tree->root->print();
+template<typename key_type, typename value_type>
+void print(RBTree<key_type, value_type>* tree) {
+    if(tree->root)
+        return tree->root->print();
 }
 
