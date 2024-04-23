@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include "map.hpp"
+#include <cstring>
 
 namespace NMap {
 
@@ -84,19 +85,25 @@ namespace NMap {
 
                     void write_data_to_file(std::ostream& os) const {
                         os.write(BNODE.c_str(), BNODE.size()); // 5 bytes 
-                        os.write(reinterpret_cast<const char*>(sizeof(item.first)), sizeof(item.first));  
-                        os.write(reinterpret_cast<const char*>(&item.first), sizeof(item.first)); 
-                        os.put(' ');
-                        os.write(reinterpret_cast<const char*>(&item.second), sizeof(item.second));
-                        os.put(' ');
+
+                        // first value(Key)
+                        size_t sizeOfKey = item.first.size();
+                        os.write(reinterpret_cast<const char*>(&sizeOfKey), sizeof(size_t));  
+                        os.write(item.first.c_str(), sizeOfKey); 
+
+                        // second value(Value)
+                        uint64_t second_value = item.second;
+                        os.write(reinterpret_cast<const char*>((&second_value)), sizeof(second_value));  
+
+                        // node's color
                         if(color == BLACK) 
                             os.put('1');
                         else 
                             os.put('0');
-                        os.put('\n');
                         if(child[0]) child[0]->write_data_to_file(os);
+                        else os.write(ENODE.c_str(), ENODE.size()); // 5 bytes
                         if(child[1]) child[1]->write_data_to_file(os);
-                        os.write(ENODE.c_str(), ENODE.size());
+                        else os.write(ENODE.c_str(), ENODE.size()); // 5 bytes
                     }
 
             };
@@ -241,29 +248,6 @@ namespace NMap {
             std::shared_ptr<TNode> root = nullptr;
         
         private:
-
-            // void inorder_traversal(std::shared_ptr<TNode> currentNode, std::ofstream& os) {      
-            //     os.write(BNODE.c_str(), BNODE.size()); 
-
-            //     if(child[0]) current->child
-            //     inorder_traversal(child[0], os);
-            //     std::cout << item.first << ' ' << item.second << (color == BLACK) << std::endl;
-            //     os.write(reinterpret_cast<const char*>(&item.first), sizeof(item.first));
-            //     os.put(' ');
-            //     os.write(reinterpret_cast<const char*>(&item.second), sizeof(item.second));
-            //     os.put(' ');
-            //     if(color == BLACK) 
-            //         os.put('1');
-            //     else 
-            //         os.put('0');
-            //     os.put('\n');
-            //     inorder_traversal(child[1], os);
-            //     os.write(ENODE.c_str(), ENODE.size());
-            // }
-
-            // void get_inorder_string_view(std::ofstream& os) {
-            //     inorder_traversal(root, os);
-            // }
          
             std::shared_ptr<TNode> _erase(std::shared_ptr<TNode> currentTNode, TPair::first_type key, bool& needBalance, bool& erased) {
 
@@ -358,24 +342,64 @@ namespace NMap {
                 if(root)
                     root->write_data_to_file(os);
             }
-
             
+            std::shared_ptr<TNode> load_from_file(std::shared_ptr<TNode> _root, std::ifstream& is) {
+                if(is.peek() == 'B') {
+                    char buffer[BNODE.size()];
 
-            std::shared_ptr<TNode> load_from_file(std::shared_ptr<TNode> root, std::ifstream& is) {
-                char buffer[BNODE.size()];
-                is.read(buffer, BNODE.size());
-                std::string stringBuffer = static_cast<std::string>(buffer);
+                    // BNODE reading
+                    is.read(buffer, (BNODE.size()));
+                    std::string stringBuffer = static_cast<std::string>(buffer);
+                    std::cout << buffer << std::endl;
 
-                std::cout << stringBuffer << std::endl;
-                return nullptr;
-                while(stringBuffer == BNODE) {
-                    is.read(stringBuffer, )
-                    std::shared_ptr<TNode> = std::make_shared<TNode>()
+                    // read size of key
+                    size_t size;
+                    is.read(reinterpret_cast<char *>(&size), sizeof(size_t));
+                    
+                    // read key
+                    char * temp = new char[size + 1];
+                    is.read(temp, size);
+                    temp[size] = '\0';
+                    std::string key = temp;
+                    delete[] temp;
+
+                    // read value
+                    uint64_t value;
+                    is.read(reinterpret_cast<char *>(&value), sizeof(value));
+                    
+                    // read color
+                    colors nodeColor;
+                    char tmpColor = is.get();
+                    if(tmpColor == '1') 
+                        nodeColor = BLACK;
+                    else 
+                        nodeColor = RED;
+                    
+                    std::cout << size << ' ' << key << ' ' << value << ' ' << nodeColor << std::endl;
+                    TPair tmpData;
+                    tmpData.first = key;
+                    tmpData.second = value;
+                    std::shared_ptr<TNode> _root = std::make_shared<TNode>(nodeColor, tmpData, nullptr, nullptr);
+                    
+                    _root->child[0] = load_from_file(_root, is);
+                    _root->child[1] = load_from_file(_root, is);
+
+                    return _root;
+                } else {
+                    char buffer[ENODE.size()];
+                    is.read(buffer, (ENODE.size()));
+                    return nullptr;
                 }
+
             }
 
             void load_from_file(std::ifstream& is) {
                 root = load_from_file(root,is);
+            }
+
+            void clear() {
+                if(root)
+                    root = nullptr;
             }
 
             friend void print<TPair>(TRBTree<TPair>* tree);

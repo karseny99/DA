@@ -4,40 +4,43 @@
 #include <vector>
 #include <fstream>
 
-std::vector<NMap::TPair<int, std::string>> seq = {{3, "adas"}, {14, "abc"}, {15, "da"}, {9, "da"}, {2, "ty"}, {6, "lk"}, {5, "jh"}, {10, "fgh"}};
+std::vector<NMap::TPair<std::string, int>> seq = {{"adas", 3}, {"abc", 14}, {"da", 15}, {"da", 9}, { "ty",2}, { "lk", 6}, { "jh", 5}, {"fgh", 10}};
 
 int main() {
     // mTMap::TPair<int, std::string> p(3, c);
     // mTMap::TPair<int, std::string> TPair = {3, "dsafds"};
     
-    NMap::TRBTree<NMap::TPair<int, std::string>> tr;
+    NMap::TRBTree<NMap::TPair<std::string, int>> tr;
 
     for(auto e : seq) {
         tr.insert(e);
     }
     NMap::print(&tr);
 
-    // for(auto e : seq) {
-    //     std::cout << "===============" << e.first << std::endl;
-    //     tr.erase(e.first);
-    //     print(&tr);
-    // }
-    NMap::TMap<int, std::string> mp;
     for(auto e : seq) {
-        std::cout << "===============" << e.first << std::endl;
+        // std::cout << "===============" << e.first << std::endl;
+        tr.erase(e.first);
+        // print(&tr);
+    }
+    NMap::TMap<std::string, int> mp;
+    for(auto e : seq) {
+        // std::cout << "===============" << e.first << std::endl;
         mp[e.first] = e.second;
     }
+
     for(auto e : seq) {
         std::cout << "===============" << e.first << std::endl;
         std::cout << mp[e.first] << std::endl;
     }
 
+    std::cout << "===================" << std::endl;
     // std::ofstream os("1.txt", std::ios::binary);
     // mp.save_to_file(os);
     // os.close();
-    std::cout << std::endl << std::endl << std::endl;
-    std::ifstream is("1.txt", std::ios::binary);
-    mp.load_from_file(is);
+    // std::cout << std::endl << std::endl << std::endl;
+    // std::ifstream is("1.txt", std::ios::binary);
+    // mp.load_from_file(is);
+
     // std::cout << mp.insert({3, "fdsdfs"}) << std::endl;
     // mp[0] = "3333333";
     // std::cout << mp[0] << std::endl;

@@ -49,7 +49,10 @@ namespace NMap {
             }
 
             void load_from_file(std::ifstream& is) {
+                rbtree.clear();
                 rbtree.load_from_file(is);
+                std::cout << "============== " << std::endl;
+                print(&rbtree);
             }
 
     };
