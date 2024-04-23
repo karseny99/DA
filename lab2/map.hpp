@@ -41,6 +41,14 @@ namespace NMap {
             }   
 
             mapped_type& operator[](key_type _key) {
+                std::shared_ptr<TPair<key_type, mapped_type>> value = rbtree.search(_key);
+                if(!value) {
+                    rbtree.insert(TPair<key_type, mapped_type>(_key));
+                }
+                return rbtree[_key];
+            }
+
+            std::shared_ptr<TPair<key_type, mapped_type>> find(key_type _key) {
                 return rbtree.search(_key);
             }
 

@@ -21,6 +21,9 @@ namespace NMap {
     const std::string magenta = "\033[0;35m";
     const std::string reset = "\033[0m";
 
+    const int LEFT = 0;
+    const int RIGHT = 1;
+
     template <class TPair>
     class TRBTree {
         private:
@@ -42,23 +45,23 @@ namespace NMap {
                         std::shared_ptr<TNode> _right) : 
                             color(_color), 
                             item(_item) {
-                                child[0] = _left;
-                                child[1] = _right;
+                                child[LEFT] = _left;
+                                child[RIGHT] = _right;
                             }
                     
                     ~TNode() = default;
 
                     bool value_exists(TPair _item) {
                         return (item.first == _item.first) or 
-                            (child[0] != nullptr and child[0]->item.first == _item.first) or 
-                            (child[1] != nullptr and child[1]->item.first == _item.first);
+                            (child[LEFT] != nullptr and child[LEFT]->item.first == _item.first) or 
+                            (child[RIGHT] != nullptr and child[RIGHT]->item.first == _item.first);
                     }   
                     
                     void print(int space = 0) {
                         space += 2;
 
-                        if(child[1])
-                            child[1]->print(space);
+                        if(child[RIGHT])
+                            child[RIGHT]->print(space);
                         for(int i = SPACES_COUNT; i < space; ++i) {
                             std::cout << ' ' ;
                         }
@@ -67,20 +70,20 @@ namespace NMap {
                         else 
                             std::cout << item.first << std::endl;
                             
-                        if(child[0])
-                            child[0]->print(space);
+                        if(child[LEFT])
+                            child[LEFT]->print(space);
                     }
 
                     bool has_no_children() {
-                        return (child[0] == nullptr) and (child[1] == nullptr);
+                        return (child[LEFT] == nullptr) and (child[RIGHT] == nullptr);
                     }
 
                     bool has_one_child() {
-                        return  (child[0] != nullptr) ^ (child[1] != nullptr);
+                        return  (child[LEFT] != nullptr) ^ (child[RIGHT] != nullptr);
                     }
 
                     bool has_two_children() {
-                        return (child[0] != nullptr) and (child[1] != nullptr);
+                        return (child[LEFT] != nullptr) and (child[RIGHT] != nullptr);
                     }
 
                     void write_data_to_file(std::ostream& os) const {
@@ -100,9 +103,9 @@ namespace NMap {
                             os.put('1');
                         else 
                             os.put('0');
-                        if(child[0]) child[0]->write_data_to_file(os);
+                        if(child[LEFT]) child[LEFT]->write_data_to_file(os);
                         else os.write(ENODE.c_str(), ENODE.size()); // 5 bytes
-                        if(child[1]) child[1]->write_data_to_file(os);
+                        if(child[RIGHT]) child[RIGHT]->write_data_to_file(os);
                         else os.write(ENODE.c_str(), ENODE.size()); // 5 bytes
                     }
 
@@ -137,10 +140,10 @@ namespace NMap {
             // sets opposite color to root and its children
             void change_colors(std::shared_ptr<TNode> TNode) { 
                 TNode->color = static_cast<colors>(!TNode->color);
-                if(TNode->child[0])
-                    TNode->child[0]->color = static_cast<colors>(!TNode->child[0]->color);
-                if(TNode->child[1])
-                    TNode->child[1]->color = static_cast<colors>(!TNode->child[1]->color);
+                if(TNode->child[LEFT])
+                    TNode->child[LEFT]->color = static_cast<colors>(!TNode->child[LEFT]->color);
+                if(TNode->child[RIGHT])
+                    TNode->child[RIGHT]->color = static_cast<colors>(!TNode->child[RIGHT]->color);
             }
 
             std::shared_ptr<TNode> check_add_correctness(std::shared_ptr<TNode> localRoot, bool direction) {
@@ -192,8 +195,8 @@ namespace NMap {
 
             std::shared_ptr<TNode> get_minimum(std::shared_ptr<TNode> currentRoot) {
                 auto mover = currentRoot;
-                while(mover->child[0] != nullptr) {
-                    mover = mover->child[0];
+                while(mover->child[LEFT] != nullptr) {
+                    mover = mover->child[LEFT];
                 }
 
                 return mover;
@@ -210,7 +213,7 @@ namespace NMap {
 
                 if(brother) {
 
-                    if(is_black(brother->child[0]) and is_black(brother->child[1])) {
+                    if(is_black(brother->child[LEFT]) and is_black(brother->child[RIGHT])) {
 
                         if(is_red(parent)) needBalance = false;
 
@@ -228,8 +231,8 @@ namespace NMap {
                         }
 
                         parent->color = parentColor;
-                        parent->child[0]->color = BLACK;
-                        parent->child[1]->color = BLACK;
+                        parent->child[LEFT]->color = BLACK;
+                        parent->child[RIGHT]->color = BLACK;
 
                         if(isRedBrotherReduction) {
                             currentTNode->child[direction] = parent;
@@ -260,12 +263,12 @@ namespace NMap {
                 if(currentTNode->item.first == key) {
 
                     // has zero or one child
-                    if(currentTNode->child[0] == nullptr or currentTNode->child[1] == nullptr) {
+                    if(currentTNode->child[LEFT] == nullptr or currentTNode->child[RIGHT] == nullptr) {
 
                         std::shared_ptr<TNode> tmp;
 
-                        if(currentTNode->child[0]) tmp = currentTNode->child[0];
-                        if(currentTNode->child[1]) tmp = currentTNode->child[1];
+                        if(currentTNode->child[LEFT]) tmp = currentTNode->child[LEFT];
+                        if(currentTNode->child[RIGHT]) tmp = currentTNode->child[RIGHT];
 
                         // If TNode is red, the black height is not changing -> don't need to do anything                
                         if(is_red(currentTNode)) {
@@ -284,7 +287,7 @@ namespace NMap {
                     // has two children, find minimum in right subtree and copy its value in currentTNode, 
                     // then delete this minimum from right subtree
                     } else {
-                        std::shared_ptr<TNode> tmp = get_minimum(currentTNode->child[1]);
+                        std::shared_ptr<TNode> tmp = get_minimum(currentTNode->child[RIGHT]);
                         // std::cout << tmp->value << std::endl;
 
                         currentTNode->item = tmp->item;
@@ -299,14 +302,24 @@ namespace NMap {
                 return needBalance ? check_erase_correctness(currentTNode, direction, needBalance) : currentTNode;
             } 
 
-            TPair::second_type& _search(TPair::first_type key, std::shared_ptr<TNode> currentTNode) {
+            TPair::second_type& get_lvalue(std::shared_ptr<TNode> currentNode, TPair::first_type key) {
+                if(currentNode == nullptr) {
+                    throw std::runtime_error("Error: can't reach such element");
+                }
+                if(key == currentNode->item.first) {
+                    return currentNode->item.second;
+                }
+                bool direction = (key >= currentNode->item.first);
+                return get_lvalue(currentNode->child[direction], key);
+            }
+
+            std::shared_ptr<TPair> _search(TPair::first_type key, std::shared_ptr<TNode> currentTNode) {
                 // if tree doesn't have this key => adding
                 if(currentTNode == nullptr) {
-                    insert((TPair(key)));
-                    return search(key);
+                    return nullptr;
                 }
                 if(key == currentTNode->item.first) {
-                    return currentTNode->item.second;
+                    return std::make_shared<TPair>(currentTNode->item);
                 }
                 bool direction = (key >= currentTNode->item.first);
                 return _search(key, currentTNode->child[direction]);
@@ -334,7 +347,7 @@ namespace NMap {
                 return erased;
             }
 
-            TPair::second_type& search(TPair::first_type key) {
+            std::shared_ptr<TPair> search(TPair::first_type key) {
                 return _search(key, root);
             }
 
@@ -381,8 +394,8 @@ namespace NMap {
                     tmpData.second = value;
                     std::shared_ptr<TNode> _root = std::make_shared<TNode>(nodeColor, tmpData, nullptr, nullptr);
                     
-                    _root->child[0] = load_from_file(_root, is);
-                    _root->child[1] = load_from_file(_root, is);
+                    _root->child[LEFT] = load_from_file(_root, is);
+                    _root->child[RIGHT] = load_from_file(_root, is);
 
                     return _root;
                 } else {
@@ -393,8 +406,12 @@ namespace NMap {
 
             }
 
+            TPair::second_type& operator[](TPair::first_type _key) {
+                return get_lvalue(root, _key);
+            }
+
             void load_from_file(std::ifstream& is) {
-                root = load_from_file(root,is);
+                root = load_from_file(root, is);
             }
 
             void clear() {

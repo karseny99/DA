@@ -3,25 +3,28 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
+#include <map>
 
 std::vector<NMap::TPair<std::string, int>> seq = {{"adas", 3}, {"abc", 14}, {"da", 15}, {"da", 9}, { "ty",2}, { "lk", 6}, { "jh", 5}, {"fgh", 10}};
 
 int main() {
     // mTMap::TPair<int, std::string> p(3, c);
     // mTMap::TPair<int, std::string> TPair = {3, "dsafds"};
+
     
-    NMap::TRBTree<NMap::TPair<std::string, int>> tr;
+    // NMap::TRBTree<NMap::TPair<std::string, int>> tr;
 
-    for(auto e : seq) {
-        tr.insert(e);
-    }
-    NMap::print(&tr);
+    // for(auto e : seq) {
+    //     tr.insert(e);
+    // }
+    // NMap::print(&tr);
 
-    for(auto e : seq) {
-        // std::cout << "===============" << e.first << std::endl;
-        tr.erase(e.first);
-        // print(&tr);
-    }
+    // for(auto e : seq) {
+    //     // std::cout << "===============" << e.first << std::endl;
+    //     tr.erase(e.first);
+    //     // print(&tr);
+    // }
+    std::cout << "==============="<< std::endl;
     NMap::TMap<std::string, int> mp;
     for(auto e : seq) {
         // std::cout << "===============" << e.first << std::endl;
