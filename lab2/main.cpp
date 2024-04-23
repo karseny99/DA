@@ -1,15 +1,47 @@
-#include "RBtree2.hpp"
+#include "map.hpp"
+#include "RBTree.hpp"
 #include <iostream>
 #include <vector>
+#include <fstream>
 
-std::vector<long long> seq = {3, 14, 15, 9, 2, 6, 5, 10};
+std::vector<NMap::TPair<int, std::string>> seq = {{3, "adas"}, {14, "abc"}, {15, "da"}, {9, "da"}, {2, "ty"}, {6, "lk"}, {5, "jh"}, {10, "fgh"}};
 
 int main() {
-    RBTree tr;
+    // mTMap::TPair<int, std::string> p(3, c);
+    // mTMap::TPair<int, std::string> TPair = {3, "dsafds"};
+    
+    NMap::TRBTree<NMap::TPair<int, std::string>> tr;
 
     for(auto e : seq) {
         tr.insert(e);
     }
+    NMap::print(&tr);
+
+    // for(auto e : seq) {
+    //     std::cout << "===============" << e.first << std::endl;
+    //     tr.erase(e.first);
+    //     print(&tr);
+    // }
+    NMap::TMap<int, std::string> mp;
+    for(auto e : seq) {
+        std::cout << "===============" << e.first << std::endl;
+        mp[e.first] = e.second;
+    }
+    for(auto e : seq) {
+        std::cout << "===============" << e.first << std::endl;
+        std::cout << mp[e.first] << std::endl;
+    }
+
+    // std::ofstream os("1.txt", std::ios::binary);
+    // mp.save_to_file(os);
+    // os.close();
+    std::cout << std::endl << std::endl << std::endl;
+    std::ifstream is("1.txt", std::ios::binary);
+    mp.load_from_file(is);
+    // std::cout << mp.insert({3, "fdsdfs"}) << std::endl;
+    // mp[0] = "3333333";
+    // std::cout << mp[0] << std::endl;
+    // std::cout << mp.erase(0) << std::endl;
     // std::cout << tr.insert(3) << std::endl;
     // std::cout << tr.insert(14) << std::endl;
     // std::cout << tr.insert(15) << std::endl;
@@ -38,14 +70,9 @@ int main() {
     // std::cout << tr.add(6) << std::endl;
     // std::cout << tr.add(5) << std::endl;
     // std::cout << tr.add(10) << std::endl;
-    // for(auto e : seq) {
-    //     std::cout << "===============" << e << std::endl;
-    //     tr.erase(e);
-    //     print(&tr);
-    // }
-    std::cout << tr.erase(14) << std::endl;
-    std::cout << "===============\n";
-    print(&tr);
+    // std::cout << tr.erase(14) << std::endl;
+    // std::cout << "===============\n";
+    // print(&tr);
 
     // std::cout << tr.find(5)->parent->value << std::endl;
     // std::cout << tr.find(3)->color << ' ' <<  tr.find(3)->value << std::endl;
