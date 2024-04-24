@@ -1,17 +1,28 @@
 #include "map.hpp"
-#include "RBTree.hpp"
+// #include "RBTree.hpp"
 #include <iostream>
 #include <vector>
 #include <fstream>
 #include <map>
-
-std::vector<NMap::TPair<std::string, int>> seq = {{"adas", 3}, {"abc", 14}, {"da", 15}, {"da", 9}, { "ty",2}, { "lk", 6}, { "jh", 5}, {"fgh", 10}};
+#include "AVLTree.hpp"
+std::vector<NMap::TPair<int, int>> seq = {{3, 3}, {14, 14}, {15, 15}, {9, 9}, { 2,2}, {65, 6}, {35, 5}, {10, 10}};
 
 int main() {
     // mTMap::TPair<int, std::string> p(3, c);
     // mTMap::TPair<int, std::string> TPair = {3, "dsafds"};
 
+    TAVLTree<NMap::TPair<int, int>> tr;
+    for(auto e : seq) {
+        std::cout << "===========" << std::endl;
+        tr.insert(e);
+        print(&tr);
+    }
     
+    for(auto e : seq) {
+        std::cout << "===============" << e.first << std::endl;
+        tr.erase(e.first);
+        print(&tr);
+    }
     // NMap::TRBTree<NMap::TPair<std::string, int>> tr;
 
     // for(auto e : seq) {
@@ -19,24 +30,19 @@ int main() {
     // }
     // NMap::print(&tr);
 
+    // std::cout << "==============="<< std::endl;
+    // NMap::TMap<std::string, int> mp;
     // for(auto e : seq) {
     //     // std::cout << "===============" << e.first << std::endl;
-    //     tr.erase(e.first);
-    //     // print(&tr);
+    //     mp[e.first] = e.second;
     // }
-    std::cout << "==============="<< std::endl;
-    NMap::TMap<std::string, int> mp;
-    for(auto e : seq) {
-        // std::cout << "===============" << e.first << std::endl;
-        mp[e.first] = e.second;
-    }
 
-    for(auto e : seq) {
-        std::cout << "===============" << e.first << std::endl;
-        std::cout << mp[e.first] << std::endl;
-    }
+    // for(auto e : seq) {
+    //     std::cout << "===============" << e.first << std::endl;
+    //     std::cout << mp[e.first] << std::endl;
+    // }
 
-    std::cout << "===================" << std::endl;
+    // std::cout << "===================" << std::endl;
     // std::ofstream os("1.txt", std::ios::binary);
     // mp.save_to_file(os);
     // os.close();

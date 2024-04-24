@@ -2,7 +2,6 @@
 #include <iostream>
 #include "RBTree.hpp"
 
-
 namespace NMap {
 
     template<class T1, class T2>
@@ -36,11 +35,11 @@ namespace NMap {
                 return rbtree.insert(item);
             }
 
-            bool erase(key_type _key) {
+            bool erase(const key_type& _key) {
                 return rbtree.erase(_key);
             }   
 
-            mapped_type& operator[](key_type _key) {
+            mapped_type& operator[](const key_type& _key) {
                 std::shared_ptr<TPair<key_type, mapped_type>> value = rbtree.search(_key);
                 if(!value) {
                     rbtree.insert(TPair<key_type, mapped_type>(_key));
@@ -48,7 +47,7 @@ namespace NMap {
                 return rbtree[_key];
             }
 
-            std::shared_ptr<TPair<key_type, mapped_type>> find(key_type _key) {
+            std::shared_ptr<TPair<key_type, mapped_type>> find(const key_type& _key) {
                 return rbtree.search(_key);
             }
 
@@ -59,8 +58,6 @@ namespace NMap {
             void load_from_file(std::ifstream& is) {
                 rbtree.clear();
                 rbtree.load_from_file(is);
-                std::cout << "============== " << std::endl;
-                print(&rbtree);
             }
 
     };

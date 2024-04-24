@@ -3,8 +3,30 @@
 #include <fstream>
 #include <cstring>
 #include <cstdint>
+/*
+Red Black Tree:
+    Insertion:
+        dad is red:
+            uncle is black => rotate
+            uncle is red => set parent's and uncle's color to grandparents => recursively get next fix up
+    
+    Deletion:
+        first step similar to default binary search tree: 
+            if two children, get min from right subtree
+            else replace deleted with its child(if needed) 
+        
+        red node => doesn't change the black height => don't care
+        brother is black:
+            parent is red => set parent black, brother to red => black height fixed 
+            parent is black => if parent == root => case above will help, else recursively get next fix up
+
+        brother is red:
+            rotate from brother => getting above case (brother became black)
+*/
+
 
 namespace NMap {
+
 
     enum colors {
         RED, 
@@ -14,10 +36,6 @@ namespace NMap {
     const std::string BNODE = "BNODE";
     const std::string ENODE = "ENODE";
     const std::string red = "\033[0;31m";
-    const std::string green = "\033[1;32m";
-    const std::string yellow = "\033[1;33m";
-    const std::string cyan = "\033[0;36m";
-    const std::string magenta = "\033[0;35m";
     const std::string reset = "\033[0m";
 
     const int LEFT = 0;
@@ -129,7 +147,7 @@ namespace NMap {
                 return newRoot;
             }    
 
-            std::shared_ptr<TNode> doubleRotate(std::shared_ptr<TNode> currentRoot, bool direction) {
+            std::shared_ptr<TNode> double_rotate(std::shared_ptr<TNode> currentRoot, bool direction) {
                 currentRoot->child[!direction] = rotate(currentRoot->child[!direction], !direction);
                 return rotate(currentRoot, direction);
             }
@@ -145,12 +163,13 @@ namespace NMap {
 
             std::shared_ptr<TNode> check_add_correctness(std::shared_ptr<TNode> localRoot, bool direction) {
                 
+                // parent is red
                 if(is_red(localRoot->child[direction])) {
                     
-                    // parent is red, uncle is red -> simply switch colors
+                    // uncle is red 
                     if(is_red(localRoot->child[!direction])) {
+                        // inserted node is red => simply switch colors
                         if(is_red(localRoot->child[direction]->child[direction]) or is_red(localRoot->child[direction]->child[!direction])) {
-                            // std::cout << "->Uncle is red, changing colors" << std::endl;
                             change_colors(localRoot); 
                         }
 
@@ -158,17 +177,13 @@ namespace NMap {
                     } else {
                         // order is right
                         if(is_red(localRoot->child[direction]->child[direction])) {
-                            // std::cout << "->Uncle is black, rotating" << std::endl;
-
                             localRoot = rotate(localRoot, !direction);
+
                         // order is wrong, need to rotate twice
                         } else if(is_red(localRoot->child[direction]->child[!direction])) {
-                            // std::cout << "->Uncle is black, rotating" << std::endl;
-
-                            localRoot = doubleRotate(localRoot, !direction);
+                            localRoot = double_rotate(localRoot, !direction);
                         }
                     }
-                    
                 } 
 
                 return localRoot;
@@ -219,19 +234,19 @@ namespace NMap {
 
                     } else {
                         colors parentColor = parent->color;
-                        bool isRedBrotherReduction = (currentTNode != parent);
+                        bool wasBrotherRed = (currentTNode != parent);
 
                         if(is_red(brother->child[!direction])) {
                             parent = rotate(parent, direction);
                         } else {
-                            parent = doubleRotate(parent, direction);
+                            parent = double_rotate(parent, direction);
                         }
 
                         parent->color = parentColor;
                         parent->child[LEFT]->color = BLACK;
                         parent->child[RIGHT]->color = BLACK;
 
-                        if(isRedBrotherReduction) {
+                        if(wasBrotherRed) {
                             currentTNode->child[direction] = parent;
                         } else {
                             currentTNode = parent;
@@ -251,6 +266,7 @@ namespace NMap {
          
             std::shared_ptr<TNode> _erase(std::shared_ptr<TNode> currentTNode, TPair::first_type key, bool& needBalance, bool& erased) {
 
+                // there's no such node
                 if(currentTNode == nullptr)  {
                     needBalance = false;
                     erased = false;
@@ -258,7 +274,6 @@ namespace NMap {
                 }
 
                 if(currentTNode->item.first == key) {
-
                     // has zero or one child
                     if(currentTNode->child[LEFT] == nullptr or currentTNode->child[RIGHT] == nullptr) {
 
@@ -267,12 +282,12 @@ namespace NMap {
                         if(currentTNode->child[LEFT]) tmp = currentTNode->child[LEFT];
                         if(currentTNode->child[RIGHT]) tmp = currentTNode->child[RIGHT];
 
-                        // If TNode is red, the black height is not changing -> don't need to do anything                
+                        // If node is red, the black height is not changing -> don't need to do anything                
                         if(is_red(currentTNode)) {
                             currentTNode = nullptr;
                             needBalance = false;
                         
-                        // if TNode is black and its child is red -> simply replace colors;
+                        // if node is black and its child is red -> simply replace colors;
                         } else if(is_red(tmp)) {
                             currentTNode = nullptr;
                             tmp->color = BLACK;
@@ -285,8 +300,6 @@ namespace NMap {
                     // then delete this minimum from right subtree
                     } else {
                         std::shared_ptr<TNode> tmp = get_minimum(currentTNode->child[RIGHT]);
-                        // std::cout << tmp->value << std::endl;
-
                         currentTNode->item = tmp->item;
                         key = tmp->item.first;
                     }
@@ -311,7 +324,6 @@ namespace NMap {
             }
 
             std::shared_ptr<TPair> _search(const TPair::first_type& key, std::shared_ptr<TNode> currentTNode) {
-                // if tree doesn't have this key => adding
                 if(currentTNode == nullptr) {
                     return nullptr;
                 }
@@ -349,8 +361,7 @@ namespace NMap {
             }
 
             void save_to_file(std::ofstream& os) {
-                if(root)
-                    root->write_data_to_file(os);
+                if(root) root->write_data_to_file(os);
             }
             
             std::shared_ptr<TNode> load_from_file(std::shared_ptr<TNode> _root, std::ifstream& is) {
@@ -393,25 +404,36 @@ namespace NMap {
                     _root->child[RIGHT] = load_from_file(_root, is);
 
                     return _root;
-                } else {
+                } else if(is.peek() == 'E') {
                     char buffer[ENODE.size()];
                     is.read(buffer, (ENODE.size()));
                     return nullptr;
+                } else {
+                    throw std::runtime_error("ERROR: given unexpected char");
                 }
 
+            }
+
+            void operator=(TRBTree& other) {
+                root = other.root;
             }
 
             TPair::second_type& operator[](TPair::first_type _key) {
                 return get_lvalue(root, _key);
             }
 
-            void load_from_file(std::ifstream& is) {
-                root = load_from_file(root, is);
+            bool load_from_file(std::ifstream& is) {
+                bool wasCorrectlyRead = true;
+                try {
+                    root = load_from_file(root, is);
+                } catch (std::runtime_error()) {
+                    wasCorrectlyRead = false;
+                }
+                return wasCorrectlyRead;
             }
 
             void clear() {
-                if(root)
-                    root = nullptr;
+                if(root) root = nullptr;
             }
 
             friend void print<TPair>(TRBTree<TPair>* tree);
@@ -479,8 +501,15 @@ namespace NMap {
             }
 
             void load_from_file(std::ifstream& is) {
-                rbtree.clear();
-                rbtree.load_from_file(is);
+                TRBTree<TPair<key_type, mapped_type>> tmpTree;
+                bool wasCorrectlyRead = tmpTree.load_from_file(is);
+                if(wasCorrectlyRead) {
+                    rbtree.clear();
+                    rbtree = tmpTree;
+                } else {
+                    tmpTree.clear();
+                    throw std::runtime_error("ERROR: Wrong file format");
+                }
             }
 
     };
