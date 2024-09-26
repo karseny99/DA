@@ -1,35 +1,19 @@
-
-// #include "../include/SufTree.hpp"
-
-// #include <iostream>
-// #include <memory>
-// #include <string>
-// #include <vector>
-// #include <array>
-
-/*
-
-Поправить, что нет онлайн расширения, а сразу по всей данной строке строиться дерево (sufTree.hpp)
-
-*/
-
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <array>
-#include <map>
-#include <algorithm>
 
 
 namespace NSuffixTree {
 
-const static std::size_t ALPHABET_SIZE = 26 + 1;
-const static std::size_t INF = 1e9;
-const static std::size_t undefinedNode = std::size_t(-1);
 
 class SuffixTree {
 
 private:
 
+    const static std::size_t ALPHABET_SIZE = 27;
+    const static std::size_t INF = 1e9;
+    const static std::size_t undefinedNode = std::size_t(-1);
 
     struct SuffixNode {
         std::size_t left;
@@ -37,13 +21,13 @@ private:
 
         std::size_t suffixLink;
 
-        std::map<std::size_t, char> childs;
+        std::array<std::size_t, ALPHABET_SIZE> childs;
 
-        SuffixNode() : left(0), length(0), suffixLink(0) {  }
+        SuffixNode() : left(0), length(0), suffixLink(0) { childs.fill(undefinedNode); }
         SuffixNode(
                     std::size_t _l, 
                     std::size_t _len
-                ) : left(_l), length(_len), suffixLink(0) {  } 
+                ) : left(_l), length(_len), suffixLink(0) { childs.fill(undefinedNode); } 
 
         // void print() {
         //     std::cout << l << ' ' << r << ' ' << (suffixLink != nullptr) << ' ';
@@ -64,17 +48,15 @@ private:
     std::string text;
     std::size_t size = 0;
 
-    std::size_t currentNode = 0;
+    std::size_t currentNode;
     std::size_t reminder = 0;
 
-    std::size_t idx_from_char(char edge) const {
+    std::size_t idx_from_char(const char& edge) const {
         return (edge != '$') ? (edge - 'a') : (ALPHABET_SIZE - 1);;
     }
 
     std::size_t move(std::size_t currentNode, char c) {
-        // std::cout << "IM HERE " << (nodes.size()) << std::endl;
-        // std::cout << nodes[currentNode].childs[0] << std::endl;
-        if(!nodes[currentNode].childs.contains(c)) {
+        if(nodes[currentNode].childs[idx_from_char(c)] == undefinedNode) {
             return undefinedNode;
         }
 
@@ -105,7 +87,6 @@ public:
     SuffixTree(const std::string& s) {
         size = 0;
         text = s;
-        create_suffix_node(0, INF);
         for(char c : text) {
             add_symbol(c);
         }
@@ -188,41 +169,10 @@ public:
     }
 };
 
-// /*
+/*
 
-// Поправить, что нет онлайн расширения, а сразу по всей данной строке строиться дерево
+Поправить, что нет онлайн расширения, а сразу по всей данной строке строиться дерево
 
-// */
+*/
 
-}
-
-
-int main() {
-    // std::ios::sync_with_stdio(false);
-    // std::cin.tie(0);
-
-    std::string s = "abcabxabc$";
-    NSuffixTree::SuffixTree tr(s);
-    tr.print();
-    // tr.addSymbol('a');
-    // tr.addSymbol('b');
-    // tr.addSymbol('c');
-    // tr.addSymbol('a');
-    // tr.addSymbol('$');
-    // abcabxabcd
-    // for(auto e : s) {
-    //     tr.addSymbol(e);
-    // }
-    std::cout << "\n\n\n\n";
-    std::cout << std::endl;
-
-    // tr.addSymbol('$');
-    // for(auto e : tr.root->nodes) {
-    //     std::cout << static_cast<char>(e.first) << std::endl;
-    // }
-
-    // tr.print();
-    // std::string t, p;
-    // std::cin >> t >> p;
-    // std::cout << t << ' ' << p << '\n';
 }
