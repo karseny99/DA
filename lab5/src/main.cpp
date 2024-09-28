@@ -7,11 +7,6 @@
 // #include <vector>
 // #include <array>
 
-/*
-
-Поправить, что нет онлайн расширения, а сразу по всей данной строке строиться дерево (sufTree.hpp)
-
-*/
 
 #include <iostream>
 #include <string>
@@ -30,18 +25,21 @@ class SuffixTree {
 
 private:
     struct SuffixNode {
-        std::size_t left;
-        std::size_t length;
+        std::size_t left = 0;
+        std::size_t length = 0;
 
         std::size_t suffixLink = 0;
 
         std::map<char, std::size_t> childs;
-
-        SuffixNode() : left(0), length(0) {  }
+        // std::array<std::size_t, ALPHABET_SIZE> childs;
+        
         SuffixNode(
                     std::size_t _l, 
                     std::size_t _len
-                ) : left(_l), length(_len) {  } 
+                ) : left(_l), length(_len)
+        { 
+            // childs.fill(std::size_t(undefinedNode));     
+        } 
     };
 
 private:
@@ -54,12 +52,12 @@ private:
     std::size_t currentNode = 0;
     std::size_t reminder = 0;
 
-    // std::size_t idx_from_char(char edge) const {
+    // std::size_t (char edge) const {
     //     return (edge != '$') ? (edge - 'a') : (ALPHABET_SIZE - 1);;
     // }
 
     std::size_t move(std::size_t node, char c) {
-        if(nodes[node].childs.count(c) == 0) {
+        if(!nodes[node].childs.contains(c)) {
             return undefinedNode;
         }
         return nodes[node].childs[c];
@@ -81,7 +79,7 @@ private:
 
     std::size_t create_suffix_node(std::size_t left = 0, std::size_t length = INF) {
         nodes.push_back(SuffixNode(left, length));
-        return ++nodes_len;
+        return nodes.size() - 1;
     }
 
 public:
@@ -122,23 +120,23 @@ public:
                     a suffix link
                 */
 
+                std::size_t goodLength = reminder - 1;
+                char unmatchedSymbol = text[nodes[nextNode].left + goodLength];
                /* ??? size - 1 ======= nodes[currentNode].left + reminder - 1*/
-                if(text[nodes[nextNode].left + reminder - 1] != symbol) {
-                    std::size_t internalNode = create_suffix_node(nodes[nextNode].left, reminder - 1);
+                if(unmatchedSymbol != symbol) {
+                    std::size_t internalNode = create_suffix_node(nodes[nextNode].left, goodLength);
                     std::size_t leaf = create_suffix_node(size - 1, INF);
 
-                    nodes[nextNode].left += reminder - 1;
-                    nodes[nextNode].length -= reminder - 1;
+                    nodes[nextNode].left += goodLength;
+                    nodes[nextNode].length -= goodLength;
                     nodes[currentNode].childs[c] = internalNode;
 
-                    nodes[internalNode].childs[text[nodes[nextNode].left + reminder - 1]] = nextNode;
+                    nodes[internalNode].childs[unmatchedSymbol] = nextNode;
                     nodes[internalNode].childs[c] = leaf;
                     
                     nodes[previousNode].suffixLink = internalNode;
                     previousNode = internalNode;
                 } else {
-
-
                     nodes[previousNode].suffixLink = currentNode;
                     return;
 
@@ -162,20 +160,46 @@ public:
         }
     }
 
-    void print() const {
-        for(int i = 0; i < nodes.size(); ++i) {
-            std::cout << nodes[i].left << ' ' << nodes[i].length << ' ' << text[nodes[i].left] << ' ' << (nodes[i].suffixLink != 0) << std::endl;
+    void print(std::size_t id, int height) const {
+        
+        for(auto& edge : nodes[id].childs) {
+            // if(edge.second == undefinedNode) continue;
+            for(int i = 0; i < 4 * (height - 1); ++i) {std::cout << ' ';}
+
+            std::cout << "--> " << edge.second << ", ";
+            for(int j = 0; j < std::min(size - nodes[edge.second].left, nodes[edge.second].length); ++j) {
+                std::cout << text[nodes[edge.second].left + j];
+            }
+            std::cout << ' ' << nodes[edge.second].suffixLink << std::endl;
+            print(edge.second, height + 1);
         }
+        
     }
+
+
+    int get_longest_common_substring() {
+        std::map<int, int> mp;
+        std::vector<bool> visited(nodes.size(), false);
+
+        // dfs(0, visited, mp);
+        
+    }
+
+    // int dfs(std::size_t cur, std::vector<bool>& visited, std::map<int, int>& mp) {
+    //     if(visited[cur]) return;
+
+    //     visited[cur] = true;
+
+    //     for(std::size_t next : nodes[cur].childs) {
+    //         mp[cur] += dfs(next, visited, mp);
+    //     }
+
+    //     if(nodes[cur].childs)
+    // }
 };
-
-// /*
-
-// Поправить, что нет онлайн расширения, а сразу по всей данной строке строиться дерево
-
-// */
-
 }
+
+
 
 
 int main() {
@@ -184,7 +208,7 @@ int main() {
 
     std::string s = "abcabxabc$";
     NSuffixTree::SuffixTree tr(s);
-    tr.print();
+    tr.print(0, 1);
     // tr.addSymbol('a');
     // tr.addSymbol('b');
     // tr.addSymbol('c');
@@ -194,8 +218,8 @@ int main() {
     // for(auto e : s) {
     //     tr.addSymbol(e);
     // }
-    std::cout << "\n\n\n\n";
-    std::cout << std::endl;
+    // std::cout << "\n\n\n\n";
+    // std::cout << std::endl;
 
     // tr.addSymbol('$');
     // for(auto e : tr.root->nodes) {

@@ -47,6 +47,7 @@ private:
             }
             int v = go(u, c);
             if (rem > data[v].len) {
+                // std::cout << v << ' ' << data.size() << std::endl;
                 rem -= data[v].len;
                 u = v;
             } else {
@@ -57,7 +58,8 @@ private:
 
     int create_node(int l = 0, int len = INF) {
         data.push_back(node_t(l, len));
-        return ++nodes;
+        // std::cout << nodes + 1 << ' ' << data.size() << std::endl;
+        return ++nodes; 
     }
 
     void build() {
@@ -88,11 +90,15 @@ private:
                     /* Case 2: splitting an edge */
                     int split = create_node(data[v].l, good_len);
                     int new_v = create_node(size - 1, INF);
-                    data[v].len -= good_len;
+
                     data[v].l += good_len;
+                    data[v].len -= good_len;
+
                     data[u].go[a] = split;
+
                     data[split].go[t] = v;
                     data[split].go[c] = new_v;
+
                     data[last].link = split;
                     last = split;
                 } else {
@@ -133,7 +139,20 @@ public:
         create_node(0, INF);
         build();
     }
+    void print1(std::size_t id, int height1) const {
+        
+        for(auto& edge : data[id].go) {
+            for(int i = 0; i < 4 * (height1 - 1); ++i) {std::cout << ' ';}
 
+            std::cout << "--> " << edge.second << ' ';
+            for(int j = data[edge.second].l;j < data[edge.second].l + data[edge.second].len; ++j) {
+                std::cout << s[j];
+            }
+            std::cout << ' ' << data[edge.second].link << std::endl;
+            print1(edge.second, height1 + 1);
+        }
+        
+    }
     friend std::ostream & operator << (std::ostream & out, suffix_tree_t & st) {
         out << "root\n";
         st.print(0, out, 1);
@@ -173,5 +192,6 @@ int main() {
     // t.push_back('z' + 1);
     suffix_tree_t st(s + '$');
     std::cout << st;
+    // st.print1(0, 1);
     // cout << st.lex_min(s.size()) << endl;
 }
