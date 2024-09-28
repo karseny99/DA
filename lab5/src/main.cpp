@@ -7,23 +7,34 @@
 // #include <vector>
 // #include <array>
 
-
+#include <vector>
 #include <iostream>
 #include <string>
 #include <array>
 #include <map>
 #include <algorithm>
+#include <utility>
 
+
+
+std::pair<bool, bool> operator+=(const std::pair<bool, bool>& x, const std::pair<bool, bool>& y) {
+    return {x.first or y.first, x.second or y.second};
+}
 
 namespace NSuffixTree {
 
 const static std::size_t ALPHABET_SIZE = 26 + 1;
 const static std::size_t INF = 1e9;
 const static std::size_t undefinedNode = std::size_t(-1);
+const static int SHIFT = 4;
+
+
 
 class SuffixTree {
 
 private:
+
+
     struct SuffixNode {
         std::size_t left = 0;
         std::size_t length = 0;
@@ -47,7 +58,6 @@ private:
     std::vector<SuffixNode> nodes;
     std::string text;
     std::size_t size = 0;
-    std::size_t nodes_len = 0;
 
     std::size_t currentNode = 0;
     std::size_t reminder = 0;
@@ -69,9 +79,13 @@ private:
             std::size_t nextNode = move(currentNode, c);
 
             if(nextNode == undefinedNode) return;
-
+            // std::cout << c << std::endl;
+            
+            // std::cout << c << ' ' << nodes[nextNode].length << std::endl;
             if(nodes[nextNode].length < reminder) {
                 reminder -= nodes[nextNode].length;
+                // std::cout << currentNode << ' ' << nextNode << std::endl;
+
                 currentNode = nextNode;
             } else return;
         }
@@ -84,9 +98,8 @@ private:
 
 public:
 
-    SuffixTree(const std::string& s) {
+    SuffixTree(const std::string& s) : text(s) {
         size = 0;
-        text = s;
         create_suffix_node(0, INF);
         for(char c : text) {
             add_symbol(c);
@@ -100,13 +113,16 @@ public:
         std::size_t previousNode = 0;
 
         while(reminder > 0) {
+
             move_node();
             char c = text[size - reminder];
-
             std::size_t nextNode = move(currentNode, c);
+
             if(nextNode == undefinedNode) {
 
                 nodes[currentNode].childs[c] = create_suffix_node(size - reminder);
+                // std::cout << currentNode<< std::endl;
+
                 nodes[previousNode].suffixLink = currentNode;
 
                 previousNode = currentNode;
@@ -122,6 +138,7 @@ public:
 
                 std::size_t goodLength = reminder - 1;
                 char unmatchedSymbol = text[nodes[nextNode].left + goodLength];
+                std::cout <<  nextNode << ' ' << symbol << std::endl;
                /* ??? size - 1 ======= nodes[currentNode].left + reminder - 1*/
                 if(unmatchedSymbol != symbol) {
                     std::size_t internalNode = create_suffix_node(nodes[nextNode].left, goodLength);
@@ -139,62 +156,90 @@ public:
                 } else {
                     nodes[previousNode].suffixLink = currentNode;
                     return;
-
                 }
 
             }
-
-            /* Rule 3
-                After an insert from the active node which is not the root node, 
-                we must follow the suffix link and set the active node to the node it points to. 
-                If there is no a suffix link, 
-                set the active node to the root node. 
-                Either way, active edge and active length stay unchanged
-            */
             if(currentNode == 0) {
                 --reminder;
             } else {
                 currentNode = nodes[currentNode].suffixLink;
             }
-
         }
     }
 
-    void print(std::size_t id, int height) const {
+    // void print(std::size_t id, int height) const {
         
-        for(auto& edge : nodes[id].childs) {
-            // if(edge.second == undefinedNode) continue;
-            for(int i = 0; i < 4 * (height - 1); ++i) {std::cout << ' ';}
+    //     for(auto& edge : nodes[id].childs) {
+    //         // if(edge.second == undefinedNode) continue;
+    //         for(int i = 0; i < SHIFT * (height - 1); ++i) {std::cout << ' ';}
 
-            std::cout << "--> " << edge.second << ", ";
-            for(int j = 0; j < std::min(size - nodes[edge.second].left, nodes[edge.second].length); ++j) {
-                std::cout << text[nodes[edge.second].left + j];
+    //         std::cout << "--> " << edge.second << ", ";
+    //         for(int j = 0; j < std::min(size - nodes[edge.second].left, nodes[edge.second].length); ++j) {
+    //             std::cout << text[nodes[edge.second].left + j];
+    //         }
+    //         std::cout << ' ' << nodes[edge.second].suffixLink << std::endl;
+    //         print(edge.second, height + 1);
+    //     }
+        
+    // }
+
+    void print_edge(int v, std::ostream & out) {
+        int edge_len = std::min(size - nodes[v].left, nodes[v].length);
+        for (int i = 0; i < edge_len; ++i) {
+            out << text[nodes[v].left + i];
+        }
+    }
+
+    void print(int id, std::ostream & out, int h) {
+        for (auto elem : nodes[id].childs) {
+            for (int i = 0; i < SHIFT * (h - 1); ++i) {
+                out << ' ';
             }
-            std::cout << ' ' << nodes[edge.second].suffixLink << std::endl;
-            print(edge.second, height + 1);
+            int v = elem.second;
+            out << "|-> {id = " << v << ", ";
+            print_edge(v, out);
+            out << ", link = " << nodes[v].suffixLink << "}\n";
+            print(v, out, h + 1);
         }
-        
     }
 
-
-    int get_longest_common_substring() {
-        std::map<int, int> mp;
-        std::vector<bool> visited(nodes.size(), false);
-
-        // dfs(0, visited, mp);
-        
+    friend std::ostream & operator << (std::ostream & out, SuffixTree & st) {
+        out << "root\n";
+        st.print(0, out, 1);
+        return out;
     }
 
-    // int dfs(std::size_t cur, std::vector<bool>& visited, std::map<int, int>& mp) {
-    //     if(visited[cur]) return;
+    // int get_longest_common_substring(const int& firstLength) {
+    //     std::map<int, std::pair<bool, bool>> mp;
+    //     std::vector<bool> visited(nodes.size(), false);
+
+    //     dfs(0, visited, mp, firstLength);
+        
+    //     for(int i = 0; i < nodes.size(); ++i) {
+    //         std::cout << i << ' ' << (mp[i].first == true and mp[i].second == true) << std::endl; 
+    //     }
+
+    //     return 0;
+    // }
+
+    // std::pair<bool, bool> dfs(std::size_t cur, std::vector<bool>& visited, std::map<int, std::pair<bool, bool>>& mp, const int& firstLength) {
+    //     if(visited[cur]) return mp[cur];
 
     //     visited[cur] = true;
 
-    //     for(std::size_t next : nodes[cur].childs) {
-    //         mp[cur] += dfs(next, visited, mp);
+    //     for(std::pair<char, std::size_t> next : nodes[cur].childs) {
+    //         mp[cur] += dfs(next.second, visited, mp, firstLength);
     //     }
 
-    //     if(nodes[cur].childs)
+    //     if(nodes[cur].childs.empty()) { // Leaf
+    //         if(nodes[cur].left < firstLength) { // long suffix
+    //             mp[cur] = std::make_pair(true, false);
+    //         } else if(nodes[cur].left > 1 + firstLength) { // short suffix
+    //             mp[cur] = std::make_pair(false, true);
+    //         }
+    //     }
+
+    //     return mp[cur];
     // }
 };
 }
@@ -206,9 +251,17 @@ int main() {
     // std::ios::sync_with_stdio(false);
     // std::cin.tie(0);
 
-    std::string s = "abcabxabc$";
+    std::string s = "xabxa!aab$";
     NSuffixTree::SuffixTree tr(s);
-    tr.print(0, 1);
+    // tr.print(0, 1);
+    // std::cout << tr << std::endl;
+    // tr.get_longest_common_substring(5);
+    // std::pair<bool, bool> f = {false, true};
+    // std::pair<bool, bool> s = {true, false};
+    // std::pair<bool, bool> t = s + f;
+
+    // std::cout << t.first << ' ' << t.second << std::endl;
+
     // tr.addSymbol('a');
     // tr.addSymbol('b');
     // tr.addSymbol('c');

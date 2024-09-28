@@ -45,10 +45,11 @@ private:
             if (!can_go(u, c)) {
                 return;
             }
+            // std::cout << c << std::endl;
             int v = go(u, c);
             if (rem > data[v].len) {
-                // std::cout << v << ' ' << data.size() << std::endl;
                 rem -= data[v].len;
+                // std::cout << u << ' ' << v << std::endl;
                 u = v;
             } else {
                 return;
@@ -59,15 +60,8 @@ private:
     int create_node(int l = 0, int len = INF) {
         data.push_back(node_t(l, len));
         // std::cout << nodes + 1 << ' ' << data.size() << std::endl;
-        return ++nodes; 
-    }
 
-    void build() {
-        size = 0;
-        nodes = 0;
-        for (size_t i = 0; i < s.size(); ++i) {
-            extend(s[i]);
-        }
+        return data.size() - 1; 
     }
 
     void extend(char c) {
@@ -86,6 +80,7 @@ private:
                 int v = go(u, a);
                 int good_len = rem - 1;
                 char t = s[data[v].l + good_len];
+                std::cout << v << ' '  << c << std::endl;
                 if (t != c) {
                     /* Case 2: splitting an edge */
                     int split = create_node(data[v].l, good_len);
@@ -137,7 +132,11 @@ private:
 public:
     suffix_tree_t(const std::string & _s) : s(_s) {
         create_node(0, INF);
-        build();
+        size = 0;
+        nodes = 0;
+        for (size_t i = 0; i < s.size(); ++i) {
+            extend(s[i]);
+        }
     }
     void print1(std::size_t id, int height1) const {
         
@@ -187,11 +186,11 @@ int main() {
     ios::sync_with_stdio(false);
     cin.tie(0);
 
-    string s = "abcabxabc";
+    string s = "xabxa!aa";
     // std::string t = s + s;
     // t.push_back('z' + 1);
-    suffix_tree_t st(s + '$');
-    std::cout << st;
+    suffix_tree_t st(s );
+    // std::cout << st;
     // st.print1(0, 1);
     // cout << st.lex_min(s.size()) << endl;
 }
