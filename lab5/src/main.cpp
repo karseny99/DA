@@ -137,19 +137,20 @@ public:
                 */
 
                 std::size_t goodLength = reminder - 1;
-                char unmatchedSymbol = text[nodes[nextNode].left + goodLength];
-                std::cout <<  nextNode << ' ' << symbol << std::endl;
+                char matchingSymbol = text[nodes[nextNode].left + goodLength];
+                // std::cout <<  nextNode << ' ' << symbol << std::endl;
                /* ??? size - 1 ======= nodes[currentNode].left + reminder - 1*/
-                if(unmatchedSymbol != symbol) {
+                if(matchingSymbol != symbol) {
                     std::size_t internalNode = create_suffix_node(nodes[nextNode].left, goodLength);
                     std::size_t leaf = create_suffix_node(size - 1, INF);
 
                     nodes[nextNode].left += goodLength;
                     nodes[nextNode].length -= goodLength;
+
                     nodes[currentNode].childs[c] = internalNode;
 
-                    nodes[internalNode].childs[unmatchedSymbol] = nextNode;
-                    nodes[internalNode].childs[c] = leaf;
+                    nodes[internalNode].childs[matchingSymbol] = nextNode;
+                    nodes[internalNode].childs[symbol] = leaf;
                     
                     nodes[previousNode].suffixLink = internalNode;
                     previousNode = internalNode;
@@ -198,7 +199,7 @@ public:
             int v = elem.second;
             out << "|-> {id = " << v << ", ";
             print_edge(v, out);
-            out << ", link = " << nodes[v].suffixLink << "}\n";
+            out << ", link = " << nodes[v].suffixLink << ' ' << "is_long_suff = " << (mp[v].first == true) << "}\n";
             print(v, out, h + 1);
         }
     }
@@ -206,37 +207,54 @@ public:
     friend std::ostream & operator << (std::ostream & out, SuffixTree & st) {
         out << "root\n";
         st.print(0, out, 1);
+        out << std::endl << st.nodes.size() << std::endl;
         return out;
     }
 
-    // int get_longest_common_substring(const int& firstLength) {
-    //     std::map<int, std::pair<bool, bool>> mp;
-    //     std::vector<bool> visited(nodes.size(), false);
+    std::map<int, std::pair<bool, bool>> mp;
 
-    //     dfs(0, visited, mp, firstLength);
+    int count_leaf() const {
+        int count_leaf = 0;
+        for(const auto& e : nodes) 
+            if(e.childs.empty()) ++count_leaf;
+
+        for(std::size_t i{0}; i < nodes.size(); ++i) {
+            if(nodes[i].childs.empty()) {
+                std::cout << i << ' ' << i - (size - count_leaf) << std::endl; 
+            }
+        }
+            
+        return count_leaf;
+    }
+
+    int get_longest_common_substring(const int& firstLength) {
+        std::vector<bool> visited(nodes.size(), false);
+
+        dfs(0, visited, firstLength);
         
-    //     for(int i = 0; i < nodes.size(); ++i) {
-    //         std::cout << i << ' ' << (mp[i].first == true and mp[i].second == true) << std::endl; 
-    //     }
+        // for(int i = 0; i < nodes.size(); ++i) {
+        //     std::cout << i << ' ' << (mp[i].first == true and mp[i].second == true) << std::endl; 
+        // }
 
-    //     return 0;
-    // }
+        return 0;
+    }
 
-    // std::pair<bool, bool> dfs(std::size_t cur, std::vector<bool>& visited, std::map<int, std::pair<bool, bool>>& mp, const int& firstLength) {
-    //     if(visited[cur]) return mp[cur];
 
-    //     visited[cur] = true;
+
+    // std::pair<bool, bool> dfs(std::size_t cur, std::vector<bool>& visited, bool& isLong) {
 
     //     for(std::pair<char, std::size_t> next : nodes[cur].childs) {
-    //         mp[cur] += dfs(next.second, visited, mp, firstLength);
+    //         mp[cur] += dfs(next.second, visited, firstLength);
     //     }
 
     //     if(nodes[cur].childs.empty()) { // Leaf
     //         if(nodes[cur].left < firstLength) { // long suffix
     //             mp[cur] = std::make_pair(true, false);
-    //         } else if(nodes[cur].left > 1 + firstLength) { // short suffix
+    //         } else  { // short suffix
     //             mp[cur] = std::make_pair(false, true);
     //         }
+
+    //         std::cout << cur << ' ' << (mp[cur].first == true) << std::endl;
     //     }
 
     //     return mp[cur];
@@ -254,8 +272,9 @@ int main() {
     std::string s = "xabxa!aab$";
     NSuffixTree::SuffixTree tr(s);
     // tr.print(0, 1);
-    // std::cout << tr << std::endl;
-    // tr.get_longest_common_substring(5);
+    tr.get_longest_common_substring(5);
+    tr.count_leaf();
+    std::cout << tr << std::endl << std::endl;
     // std::pair<bool, bool> f = {false, true};
     // std::pair<bool, bool> s = {true, false};
     // std::pair<bool, bool> t = s + f;

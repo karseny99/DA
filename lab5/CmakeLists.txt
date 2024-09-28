@@ -5,7 +5,7 @@ project(321)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_compile_options(-pedantic -Wall -g -Wextra) # -DDEBUG
+add_compile_options(-g ) # -DDEBUG -pedantic -Wall -g -Wextra
 
 add_executable(main src/main.cpp)
 add_executable(s src/tmp.cpp)
