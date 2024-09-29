@@ -10,7 +10,6 @@ namespace vector {
     template <class T>
     class Vector {
     private:
-
         int size;
         int capacity;
         T* buffer = nullptr;
@@ -112,10 +111,9 @@ namespace vector {
 
 
 
-        // Vector::const_iterator begin() const;
-        // Vector::const_iterator end() const;
         Vector::iterator begin();
         Vector::iterator end();
+        
         void push_back(T element);
 
         void pop_back();

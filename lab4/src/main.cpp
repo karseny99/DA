@@ -41,7 +41,6 @@ namespace NBoyerMoore {
         private:
 
             /*  heuristic of good suffix
-
                 N[j] - longest suffix of substring s[1..j] which is also a suffix of s 
                 
                 l_[i] - largest position such that suffix of s matches the suffix of s[1..l_[i]] (strong one)

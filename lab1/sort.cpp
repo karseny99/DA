@@ -7,10 +7,9 @@ namespace sort {
     const int array_digit_size = 16;
     const int key_length = 32;
 
-    void radix_sort( vector::Vector<TValue>& elems ) {
+    void radix_sort( vector::Vector<value::TValue>& elems ) {
 
-        // TValue *tmpResult = new TValue[size];
-        vector::Vector<TValue> tmpResult(elems.get_size() + 1, true);
+        vector::Vector<value::TValue> tmpResult(elems.get_size() + 1, true);
 
         for(int j = key_length - 1; j >= 0; --j) {
 

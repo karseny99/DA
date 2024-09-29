@@ -10,20 +10,20 @@ using duration_t = std::chrono::microseconds;
 const std::string DURATION_PREFIX = "us";
 
 
-bool cmp(const TValue& a, const TValue& b) {
+bool cmp(const value::TValue& a, const value::TValue& b) {
     return a.key < b.key;
 }
 
 int main() {
-    vector::Vector<TValue> input(true);
-    TValue* input_stl = new TValue[MAX_ARRAY_SIZE];
+    vector::Vector<value::TValue> input(true);
+    value::TValue* input_stl = new value::TValue[MAX_ARRAY_SIZE];
     
     std::string key;
     uint64_t value;
     int size = 0;
 
     while (std::cin >> key >> value) {
-        input.push_back(TValue(key, value));
+        input.push_back(value::TValue(key, value));
         input_stl[size].set(key, value) ;
         ++size;
     }
@@ -35,7 +35,7 @@ int main() {
     std::chrono::time_point<std::chrono::system_clock> start_ts = std::chrono::system_clock::now();
     sort::radix_sort( input );
     auto end_ts = std::chrono::system_clock::now();
-    uint64_t counting_sort_ts = std::chrono::duration_cast<duration_t>( end_ts - start_ts ).count();
+    std::chrono::time_point<std::chrono::system_clock> start_ts = std::chrono::system_clock::now();
 
     // // Измеряем время работы stl сортировки.
     start_ts = std::chrono::system_clock::now();

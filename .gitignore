@@ -22,6 +22,7 @@ Testing
 Makefile
 tests
 solution
+main
 theory
 libbox_cap.a
 cmake_install.cmake

@@ -8,11 +8,10 @@ int main() {
     std::string key;
     uint64_t value;
 
-
-    vector::Vector<TValue> elems(true);
+    vector::Vector<value::TValue> elems(true);
 
     while(std::cin >> key >> value) {
-        elems.push_back(TValue(key, value));
+        elems.push_back(value::TValue(key, value));
     }
 
     sort::radix_sort( elems );
