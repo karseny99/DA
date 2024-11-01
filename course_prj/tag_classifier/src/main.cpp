@@ -3,10 +3,24 @@
 
 void init() {
 
+    // TODO : 
+    /*
+    
+    input: 
+
+        num of lines in question
+
+        tag1, tag2, tag3, ...
+
+        head of question
+        <n lines of question>
+    
+    */
+
     int trainSize, testSize;
     std::cin >> trainSize >> testSize; 
 
-    BayesClassificator::GaussianNaiveBayes gnb;
+    BayesClassificator::BayesTagClassificator gnb;
 
     for(int i{0}; i < trainSize; ++i) {
 
@@ -20,7 +34,7 @@ void init() {
         std::stringstream currentStrBuf{currentString};
         while(currentStrBuf >> word) text.emplace_back(word);
 
-        gnb.fit(static_cast<BayesClassificator::classType>(type), text);
+        gnb.fit(std::vector<std::string> tags, text);
     }
 
     for(int i{0}; i < testSize; ++i) {
@@ -34,11 +48,10 @@ void init() {
         std::cout << static_cast<int>(gnb.predict(text)) << std::endl;;
     }
 
-}
+}        
 
 int main() {
     std::ios::sync_with_stdio(false);
     std::cin.tie(0);
-    init();
-
+    // init();
 }

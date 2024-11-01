@@ -7,6 +7,7 @@
 //     // [[maybe_unused]] ScopedColor sc = red; // Doesn't compile
 //     [[maybe_unused]] ScopedColor sc = ScopedColor::red;
 // }
+как
 
 // #include <type_traits>
 

@@ -20,7 +20,6 @@ class SuffixTree {
 
 private:
 
-
     struct SuffixNode {
         std::size_t left = 0;
         std::size_t length = 0;
@@ -83,26 +82,56 @@ public:
 
     void add_symbol(char symbol) {
 
+        /* About suffix links
+            На i-ом этапе мы будем устанавливать суффиксную ссылку для внутренней вершины, 
+            созданной i - 1-ом. 
+            Если мы создаём новую внутреннюю вершину, 
+            то суффиксная ссылка будет вести в неё.
+            В двух остальных случаях суффиксная ссылка ведёт в currentNode
+        */
+
         ++reminder;
         ++size;
         std::size_t previousNode = 0;
 
         while(reminder > 0) {
-            
+            /* Step 1.
+                Если pos = 0, то все суффиксы обработаны. 
+                Завершаемся. Иначе найдём вершину, 
+                после которой находится новый суффикс. 
+                То есть, пока pos больше длины ребра, 
+                исходящего из данной вершины, 
+                будем идти по ребру и вычитать его длину из pos.
+            */
             move_node();
             char c = text[size - reminder];
             std::size_t nextNode = move(currentNode, c);
 
+            // Step 2.
+
             if(nextNode == undefinedNode) {
+
+                /* Step 2.1
+                    Если у нас нет исходящего ребра по интересующему нас символу, 
+                    то мы просто создаём новую вершину и подвешиваем её к текущей.
+                */
 
                 nodes[currentNode].childs[c] = create_suffix_node(size - reminder);
                 nodes[previousNode].suffixLink = currentNode;
                 previousNode = currentNode;
                 
             } else {
-
                 char matchingSymbol = text[nodes[nextNode].left + reminder - 1];
 
+                /* Step 2.2
+                    Если ребро есть и суффикс не лежит на нём целиком, 
+                    это значит, 
+                    что нам нужно создать новую вершину посередине этого ребра, 
+                    к которой подвесить старую вершину с конца ребра и новую вершину, 
+                    соответствующую суффиксу. 
+                    Стоит заметить, что ребро к новому листу в данный момент будет иметь длину, 
+                    равную единице.
+                */
                 if(matchingSymbol != symbol) {
                     std::size_t internalNode = create_suffix_node(nodes[nextNode].left, reminder - 1);
                     std::size_t leaf = create_suffix_node(size - 1, INF);
@@ -118,11 +147,25 @@ public:
                     nodes[previousNode].suffixLink = internalNode;
                     previousNode = internalNode;
                 } else {
+                    /* Step 2.3
+                        Если ребро есть и суффикс, 
+                        который мы хотим добавить целиком лежит на нём, 
+                        завершаем свою работу — этот и дальнейшие суффиксы не являются уникальными.
+                    */
                     nodes[previousNode].suffixLink = currentNode;
                     return;
                 }
 
             }
+            /*
+            Step 3
+                Если мы не завершили работу на прошлом шаге, 
+                переходим к следующему суффиксу. 
+                Если мы находимся в корне, 
+                то мы уменьшаем pos на единицу,
+                иначе же мы просто переходим по суффиксной ссылке node = link(node). 
+                После этого мы переходим к пункту 1.
+            */
             if(currentNode == 0) {
                 --reminder;
             } else {

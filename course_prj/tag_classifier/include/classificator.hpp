@@ -6,30 +6,38 @@
 
 namespace BayesClassificator {
 
-
-enum class classType {
-    DOCUMENT,
-    NOT_DOCUMENT
-};
-
-class GaussianNaiveBayes {
+class BayesTagClassificator {
 private:    
-public:
-
     using text_t = std::vector<std::string>;
-
-    std::unordered_map<std::string, int> freqDoc;
-    std::unordered_map<std::string, int> freqNotDoc;
-
-    int docWordCount = 0;
-    int notDocWordCount = 0;
 
     double probabilityDoc = 0.5;
 
+    struct tagInfo {
+        std::unordered_map<std::string, size_t> freq;
+        size_t wordsUnderTag = 0;
+        size_t tagEntry = 0;
 
-    classType predict(const text_t& text);
+        void add(std::unordered_map<std::string, size_t> _freq, size_t wordCount) {
+            ++tagEntry;
+            wordsUnderTag += wordCount;
+            for(auto [key, value] : _freq) {
+                freq[key] += value;
+            }
+        }
 
-    void fit(classType type, const text_t& text);
+        tagInfo(std::unordered_map<std::string, size_t> _freq) : freq(_freq) {}
+    };
+
+    std::unordered_map<std::string, tagInfo> fittedTags;
+
+    std::unordered_map<std::string, size_t> getFrequency(const text_t& text) const;
+
+public:
+
+    // returns vector of predicted tags
+    std::vector<std::pair<std::string, double>> predict(const text_t& text);
+
+    void fit(const std::vector<std::string>& tags, const text_t& text);
 
 };
 

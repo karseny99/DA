@@ -14,8 +14,6 @@ enum class classType {
 
 class GaussianNaiveBayes {
 private:    
-public:
-
     using text_t = std::vector<std::string>;
 
     std::unordered_map<std::string, int> freqDoc;
@@ -25,7 +23,7 @@ public:
     int notDocWordCount = 0;
 
     double probabilityDoc = 0.5;
-
+public:
 
     classType predict(const text_t& text);
 
