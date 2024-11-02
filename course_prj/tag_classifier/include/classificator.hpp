@@ -2,7 +2,7 @@
 #include <vector>
 #include <sstream>
 #include <unordered_map>
-
+#include <cmath>
 
 namespace BayesClassificator {
 
@@ -25,6 +25,7 @@ private:
             }
         }
 
+        tagInfo() = default;
         tagInfo(std::unordered_map<std::string, size_t> _freq) : freq(_freq) {}
     };
 
@@ -32,7 +33,10 @@ private:
 
     std::unordered_map<std::string, size_t> getFrequency(const text_t& text) const;
 
+
 public:
+
+    void showFrequency() const;
 
     // returns vector of predicted tags
     std::vector<std::pair<std::string, double>> predict(const text_t& text);
@@ -41,5 +45,10 @@ public:
 
 };
 
+std::vector<std::pair<std::string, double>>& softmax(std::vector<std::pair<std::string, double>>& arr);
+
+std::string readTag(std::istream& is);
+
+std::string& normalize(std::string& s);
 
 }
