@@ -1,5 +1,48 @@
 #include "../include/classificator.hpp"
 
+std::ifstream& BayesClassificator::operator>>(std::ifstream& is, BayesClassificator::BayesTagClassificator& btc) {
+
+    size_t fittedTagCount;
+    is >> fittedTagCount;
+
+    for(size_t i{0}; i < fittedTagCount; ++i) {
+
+        std::string tagName;
+        size_t wordsUnderTag, tagEntry;
+
+        is >> tagName >> wordsUnderTag >> tagEntry;
+
+        size_t freqCount;
+        is >> freqCount;
+
+        std::unordered_map<std::string, size_t> _freq;
+        for(size_t k{0}; k < freqCount; ++k) {
+            std::string word;
+            size_t frequency;
+            is >> word >> frequency;
+
+            _freq[word] = frequency;
+        }
+
+        btc.fittedTags.emplace(tagName, BayesTagClassificator::tagInfo(_freq, wordsUnderTag, tagEntry));
+    }
+
+    return is;
+}
+
+std::ofstream& BayesClassificator::BayesTagClassificator::operator<<(std::ofstream& os) const {
+    os << fittedTags.size() << '\n';
+    for(const auto& [tagName, tagInfo] : fittedTags) {
+        os << tagName << ' ' << tagInfo.wordsUnderTag << ' ' << tagInfo.tagEntry << '\n';
+        os << tagInfo.freq.size() << '\n';
+        for(const auto& [word, freq] : tagInfo.freq) {
+            os << word << ' ' << freq << '\n';
+        }
+    }
+
+    return os;
+}
+
 void BayesClassificator::BayesTagClassificator::showFrequency() const {
     for(auto [key, value] : fittedTags) {
         std::cout << '[' << key << ']' << ' ' << value.tagEntry << ' ' << value.wordsUnderTag << std::endl;
@@ -55,7 +98,15 @@ std::vector<std::pair<std::string, double>> BayesClassificator::BayesTagClassifi
         tagsProbs.push_back({tagName, tagLogProb});
     }
 
-    return BayesClassificator::softmax(tagsProbs);
+    tagsProbs = BayesClassificator::softmax(tagsProbs);
+    std::vector<std::pair<std::string, double>> predicted;
+
+    for(auto& [tagName, prob] : tagsProbs) {
+        if(prob > 1.0 / fittedTags.size())
+            predicted.emplace_back(tagName, prob);
+    }
+
+    return predicted;
 }
 
 std::string BayesClassificator::readTag(std::istream& is) {
@@ -72,7 +123,7 @@ std::string& BayesClassificator::normalize(std::string& s) {
         if('A' <= s[i] and s[i] <= 'Z') 
             s[i] = (s[i] - 'A' + 'a');
     }
-    if(s.back() == '?') s.pop_back();
+    if(s.back() == '?' or s.back() == '.' or s.back() == ',') s.pop_back();
 
     return s;
 }

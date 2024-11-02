@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <sstream>
+#include <fstream>
 #include <unordered_map>
 #include <cmath>
 
@@ -9,8 +10,6 @@ namespace BayesClassificator {
 class BayesTagClassificator {
 private:    
     using text_t = std::vector<std::string>;
-
-    double probabilityDoc = 0.5;
 
     struct tagInfo {
         std::unordered_map<std::string, size_t> freq;
@@ -27,6 +26,11 @@ private:
 
         tagInfo() = default;
         tagInfo(std::unordered_map<std::string, size_t> _freq) : freq(_freq) {}
+        tagInfo(std::unordered_map<std::string, size_t> _freq, size_t _wordsUnderTag, size_t _tagEntry) 
+            : freq(_freq)
+            , wordsUnderTag(_wordsUnderTag)
+            , tagEntry(_tagEntry)
+        {}
     };
 
     std::unordered_map<std::string, tagInfo> fittedTags;
@@ -36,6 +40,8 @@ private:
 
 public:
 
+    std::ofstream& operator<<(std::ofstream& os) const;
+
     void showFrequency() const;
 
     // returns vector of predicted tags
@@ -43,7 +49,11 @@ public:
 
     void fit(const std::vector<std::string>& tags, const text_t& text);
 
+    friend std::ifstream& operator>>(std::ifstream& is, BayesClassificator::BayesTagClassificator& btc);
+
 };
+
+std::ifstream& operator>>(std::ifstream& is, BayesClassificator::BayesTagClassificator& btc);
 
 std::vector<std::pair<std::string, double>>& softmax(std::vector<std::pair<std::string, double>>& arr);
 
