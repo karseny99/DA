@@ -1,18 +1,13 @@
 #include "../include/classificator.hpp"
 
-void learn(std::ifstream& is, std::ofstream& os) {
+#include <cassert>
+#include <cstring>
 
-    /*   
-    input: 
-        num of lines in question
-        tag1, tag2, tag3, ...
-        head of question
-        <n lines of question>   
-    */
+void learn(std::ifstream& is, std::ofstream& os) {
     BayesClassificator::BayesTagClassificator btc;
 
     while(!is.eof()) {
-        int questionLines;
+        size_t questionLines;
         is >> questionLines; 
 
         std::vector<std::string> tags;
@@ -57,35 +52,55 @@ void classify(std::ifstream& is, std::ifstream& stats, std::ofstream& os) {
             while(currentStrBuf >> word) text.emplace_back(BayesClassificator::normalize(word));
         }
 
-        for(auto w : text) {
-            std::cout << w << ' ' ;
-        }
-        std::cout << "hwre" << std::endl;
         predictions.emplace_back(btc.predict(text));
     }
 
     for(const std::vector<std::pair<std::string, double>>& tagItem : predictions) {
         std::string currentLine;
         for(const auto& [tag, prob] : tagItem) 
-            currentLine += tag + ' ' + std::to_string(prob) + ',';
+            currentLine += tag + ' ' + std::to_string(prob) + ", ";
+        currentLine.pop_back();
         currentLine.pop_back();
         os << currentLine;
         os << '\n';
     }
-    // std::vector<std::string> t{"my", "dog", "is", "very", "funny"};
-    // std::vector<std::string> t{"Hello"};
-    // std::vector<std::string> t{"I", "like", "to", "walk", "with", "dogs"};
-    // std::vector<std::string> t{"I", "like", "to", "play", "footbal"};
 }
 
-int main() {
-    std::ios::sync_with_stdio(false);
-    std::ifstream is("files/in.classify");
-    std::ofstream os("files/out.result");
-    std::ifstream stats("files/out.stats", std::ios_base::out);
+int main(int argc, char**argv) {
+    assert(argc == 6 or argc == 8);
 
-    classify(is, stats, os);
-    // is >> btc;
-    // btc << os;
-    // learn(is, os);
+    if(std::strcmp(argv[1], "learn") == 0) {
+        
+        assert(std::strcmp(argv[2], "--input") == 0);
+        assert(std::strcmp(argv[4], "--output") == 0);
+
+        std::ifstream is(argv[3]);
+        std::ofstream os(argv[5]);
+
+        BayesClassificator::BayesTagClassificator btc;
+
+        learn(is, os);
+
+        std::cout << "Learnt on " << argv[3] << std::endl;
+        std::cout << "Saved stats in " << argv[5] << std::endl;
+
+    } else if(std::strcmp(argv[1], "classify") == 0) {
+
+        assert(std::strcmp(argv[2], "--stats") == 0);
+        assert(std::strcmp(argv[4], "--input") == 0);
+        assert(std::strcmp(argv[6], "--output") == 0);
+
+        std::ifstream stats(argv[3]);
+        std::ifstream is(argv[5]);
+        std::ofstream os(argv[7]);
+        
+        BayesClassificator::BayesTagClassificator btc;
+
+        classify(is, stats, os);
+
+        std::cout << "Stats imported from " << argv[3] << std::endl;
+        std::cout << "Data to classify from " << argv[5] << std::endl;
+        std::cout << "Classified data in " << argv[7] << std::endl;
+
+    }
 }
