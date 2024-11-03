@@ -1,6 +1,12 @@
 #include "../include/classificator.hpp"
 
+size_t BayesClassificator::BayesTagClassificator::uniqueWordsCount() const {
+    return wordEntries.size();
+}
+
 std::ifstream& BayesClassificator::operator>>(std::ifstream& is, BayesClassificator::BayesTagClassificator& btc) {
+
+    is >> btc.trials;
 
     size_t fittedTagCount;
     is >> fittedTagCount;
@@ -22,6 +28,7 @@ std::ifstream& BayesClassificator::operator>>(std::ifstream& is, BayesClassifica
             is >> word >> frequency;
 
             _freq[word] = frequency;
+            btc.wordEntries[word] = true;
         }
 
         btc.fittedTags.emplace(tagName, BayesTagClassificator::tagInfo(_freq, wordsUnderTag, tagEntry));
@@ -31,6 +38,7 @@ std::ifstream& BayesClassificator::operator>>(std::ifstream& is, BayesClassifica
 }
 
 std::ofstream& BayesClassificator::BayesTagClassificator::operator<<(std::ofstream& os) const {
+    os << trials << '\n';
     os << fittedTags.size() << '\n';
     for(const auto& [tagName, tagInfo] : fittedTags) {
         os << tagName << ' ' << tagInfo.wordsUnderTag << ' ' << tagInfo.tagEntry << '\n';
@@ -69,16 +77,20 @@ std::vector<std::pair<std::string, double>>& BayesClassificator::softmax(std::ve
     return arr;
 }
 
-std::unordered_map<std::string, size_t> BayesClassificator::BayesTagClassificator::getFrequency(const text_t& text) const {
+std::unordered_map<std::string, size_t> BayesClassificator::BayesTagClassificator::getFrequency(const text_t& text) {
     std::unordered_map<std::string, size_t> freqDict;
-    for(const std::string& word : text) 
+    for(const std::string& word : text) {
         ++freqDict[word];
+        wordEntries[word] = true;
+    }
     
     return freqDict;
 }
 
 void BayesClassificator::BayesTagClassificator::fit(const std::vector<std::string>& tags, const text_t& text) {
     std::unordered_map<std::string, size_t> freqDict = getFrequency(text);
+
+    ++trials;
 
     for(const std::string& tag : tags) {
         fittedTags[tag].add(freqDict, text.size());
@@ -89,10 +101,13 @@ std::vector<std::pair<std::string, double>> BayesClassificator::BayesTagClassifi
     std::vector<std::pair<std::string, double>> tagsProbs;
 
     for(auto [tagName, tagInfo] : fittedTags) {
-        double tagLogProb = log(tagInfo.tagEntry) - log(static_cast<double>(fittedTags.size())); 
-
+        double tagLogProb = log(tagInfo.tagEntry) - log(trials); 
+        // double tagLogProb = tagInfo.tagEntry / static_cast<double>(fittedTags.size()); 
+        // std::cout << tagName << ' ' << tagLogProb << std::endl;
         for(const std::string& word : text) {
-            tagLogProb += log(tagInfo.freq[word] + 1) - log(static_cast<double>(tagInfo.wordsUnderTag));
+            // tagLogProb *= (tagInfo.freq[word] + 1) ;
+            // tagLogProb /= static_cast<double>(tagInfo.wordsUnderTag);
+            tagLogProb += log(tagInfo.freq[word] + 1) - log(tagInfo.wordsUnderTag + 1 * uniqueWordsCount());
         }
 
         tagsProbs.push_back({tagName, tagLogProb});

@@ -1,0 +1,44 @@
+1
+sort, theorem
+Theorem on the time complexity of sorting algorithms
+Why algorithms that use element comparisons have linear complexity?
+1
+sort, algorithm, counting_sort
+counting sort
+How does counting sort work?
+1
+sort, algorithm, proof, counting_sort
+proof of algorithm's linearity
+Why does counting sort have linear complexity?
+1
+tree, algorithm
+Binary search tree
+What is the assessment of the algorithmic complexity of basic operations in Binary search tree?
+1
+tree, balanced_tree, AVL-tree
+basic operations in AVL tree
+How does AVL tree work?
+1
+tree, balanced_tree, RBTree
+height of a red-black tree
+Why the height of a red-black tree is log of elements inside?
+1
+theorem, string, algorithm
+naive algorithm
+Why does the simplest algorithm work slow?
+1
+string, algorithm
+z-function application
+How we can use z-function to find pattern in text?
+1
+string, algorithm
+boyer-moore rules
+What rules boyer-moore uses to work fast with text search?
+1
+string, suffix_tree, tree, algorithm
+suffix tree necessity
+How do we can apply suffix tree in text search?
+1
+string, suffix_tree, tree, algorithm, theorem
+ukkonen's algorithm of building suffix tree complexity
+why ukkonen's algorithm of building suffix tree is linear?

@@ -1,0 +1,2 @@
+./main learn --input files/input.learn --output files/out.stats
+./main classify --stats files/out.stats --input files/in.classify --output files/out.result

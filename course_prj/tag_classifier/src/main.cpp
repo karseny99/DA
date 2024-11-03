@@ -51,8 +51,7 @@ void classify(std::ifstream& is, std::ifstream& stats, std::ofstream& os) {
             std::stringstream currentStrBuf{currentString};
             while(currentStrBuf >> word) text.emplace_back(BayesClassificator::normalize(word));
         }
-
-        predictions.emplace_back(btc.predict(text));
+        predictions.emplace_back(std::move(btc.predict(text)));
     }
 
     for(const std::vector<std::pair<std::string, double>>& tagItem : predictions) {

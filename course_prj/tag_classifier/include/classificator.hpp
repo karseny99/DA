@@ -10,7 +10,7 @@ namespace BayesClassificator {
 class BayesTagClassificator {
 private:    
     using text_t = std::vector<std::string>;
-
+  
     struct tagInfo {
         std::unordered_map<std::string, size_t> freq;
         size_t wordsUnderTag = 0;
@@ -32,11 +32,17 @@ private:
             , tagEntry(_tagEntry)
         {}
     };
+    
+    std::unordered_map<std::string, size_t> getFrequency(const text_t& text);
 
     std::unordered_map<std::string, tagInfo> fittedTags;
 
-    std::unordered_map<std::string, size_t> getFrequency(const text_t& text) const;
+    size_t trials = 0; 
 
+    // for computing num of unique words in train
+    std::unordered_map<std::string, bool> wordEntries;
+
+    size_t uniqueWordsCount() const;
 
 public:
 
