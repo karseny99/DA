@@ -1,4 +1,4 @@
-11
+12
 11
 suffix_tree 29 2
 19
@@ -60,19 +60,26 @@ ukkonen's 2
 fast 1
 apply 1
 boyer-moore 2
-rbtree 17 1
-11
-height 2
-a 2
-inside 1
-of 3
-red-black 2
-tree 2
-why 1
-the 1
-is 1
+rbtree 31 2
+18
+insertion 1
+in 2
+elements 2
 log 1
-elements 1
+is 1
+the 1
+why 1
+tree 4
+red-black 4
+insert 1
+inside 1
+a 2
+of 4
+height 2
+rules 1
+we 1
+how 1
+do 1
 avl-tree 10 1
 8
 basic 1
@@ -83,24 +90,29 @@ tree 2
 how 1
 does 1
 work 1
-balanced_tree 27 2
-18
+balanced_tree 41 3
+23
+insertion 1
+do 1
 a 2
+insert 1
 inside 1
 height 2
-of 3
-red-black 2
+of 4
+red-black 4
 work 1
 does 1
-how 1
-tree 4
-in 1
+rules 1
+we 1
+how 2
+tree 6
+in 3
 avl 2
 operations 1
 basic 1
 the 1
 why 1
-elements 1
+elements 2
 log 1
 is 1
 proof 11 1
@@ -131,43 +143,46 @@ does 2
 of 1
 have 1
 work 1
-tree 74 5
-35
+tree 88 6
+38
 linear 1
 algorithm 2
 building 2
 suffix 4
 ukkonen's 2
 apply 1
+can 1
+text 1
 binary 2
 what 1
-of 7
+of 8
 height 2
+necessity 1
+assessment 1
 search 3
-tree 10
+tree 12
 is 3
 basic 2
 algorithmic 1
-can 1
 operations 2
 complexity 2
 avl 2
 the 3
-in 3
+in 5
 work 1
-assessment 1
-necessity 1
-how 2
+how 3
 does 1
-we 1
-elements 1
+we 2
+rules 1
+elements 2
 log 1
 why 2
-red-black 2
+red-black 4
 inside 1
+insert 1
 a 2
-do 1
-text 1
+do 2
+insertion 1
 algorithm 98 8
 48
 building 2

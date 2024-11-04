@@ -1,3 +1,5 @@
 ./main learn --input files/input.learn --output files/out.stats
+echo -e "Running next step ...\\n\\n (Classificator) \\n\\n"
 ./main classify --stats files/out.stats --input files/in.classify --output files/out.result
-make && ./estimator --answer files/in.ans --prediction files/out.result
+echo -e "Running next step ...\\n\\n (Estimator) \\n\\n"
+./estimator --answer files/in.ans --prediction files/out.result

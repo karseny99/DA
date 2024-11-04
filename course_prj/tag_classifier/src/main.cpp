@@ -54,6 +54,7 @@ void classify(std::ifstream& is, std::ifstream& stats, std::ofstream& os) {
         predictions.emplace_back(std::move(btc.predict(text)));
     }
 
+    os << predictions.size() << '\n';
     for(const std::vector<std::pair<std::string, double>>& tagItem : predictions) {
         std::string currentLine;
         for(const auto& [tag, prob] : tagItem) 

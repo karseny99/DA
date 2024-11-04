@@ -23,6 +23,10 @@ tree, balanced_tree, RBTree
 height of a red-black tree
 Why the height of a red-black tree is log of elements inside?
 1
+tree, balanced_tree, RBTree
+rules of insertion in red-black tree
+How do we insert elements in red-black tree?
+1
 theorem, string, algorithm
 naive algorithm
 Why does the simplest algorithm work slow?
@@ -35,7 +39,7 @@ string, algorithm
 boyer-moore rules
 What rules boyer-moore uses to work fast with text search?
 1
-string, , tree, algorithm
+string, suffix_tree, tree, algorithm
 suffix tree necessity
 How do we can apply suffix tree in text search?
 1
