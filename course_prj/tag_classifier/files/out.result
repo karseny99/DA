@@ -1,6 +1,7 @@
-tree 0.521489, balanced_tree 0.207078
-tree 0.327101, balanced_tree 0.492990, rbtree 0.147872
-sort 0.162902, counting_sort 0.763083
-balanced_tree 0.278771, avl-tree 0.418268, rbtree 0.101842
-theorem 0.228734, counting_sort 0.144225, proof 0.170398, avl-tree 0.103076
-suffix_tree 0.919395
+6
+tree, balanced_tree
+tree, balanced_tree, rbtree
+sort, counting_sort
+balanced_tree, avl-tree, rbtree
+theorem, algorithm, string
+suffix_tree

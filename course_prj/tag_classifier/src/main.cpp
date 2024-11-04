@@ -57,7 +57,7 @@ void classify(std::ifstream& is, std::ifstream& stats, std::ofstream& os) {
     for(const std::vector<std::pair<std::string, double>>& tagItem : predictions) {
         std::string currentLine;
         for(const auto& [tag, prob] : tagItem) 
-            currentLine += tag + ' ' + std::to_string(prob) + ", ";
+            currentLine += tag  /*+ ' '+ std::to_string(prob) */ + ", ";
         currentLine.pop_back();
         currentLine.pop_back();
         os << currentLine;

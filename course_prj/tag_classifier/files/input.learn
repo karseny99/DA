@@ -35,7 +35,7 @@ string, algorithm
 boyer-moore rules
 What rules boyer-moore uses to work fast with text search?
 1
-string, suffix_tree, tree, algorithm
+string, , tree, algorithm
 suffix tree necessity
 How do we can apply suffix tree in text search?
 1

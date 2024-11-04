@@ -1,5 +1,5 @@
 1
-red-black tree
+red-black tree usage
 how do we use red-black tree?
 1
 red-black tree necessity
@@ -11,8 +11,8 @@ How do we use counting sort in radix sort?
 B-tree usage
 Where b-tree is better than AVL tree or others?
 1
-KMP complexity
-What is the difference between KMP algorithm and boyer-moore, does it better?
+KMP algorithm
+Does the KMP algorithm work better than boyer-moore?
 2
 suffix links in ukkonen's algorithm
 How do we use suffix links in ukkonen's algorithm of building suffix tree?

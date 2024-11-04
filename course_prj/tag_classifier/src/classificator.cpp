@@ -126,7 +126,8 @@ std::vector<std::pair<std::string, double>> BayesClassificator::BayesTagClassifi
 
 std::string BayesClassificator::readTag(std::istream& is) {
     std::string tag;
-    while(is.peek() != ',' and is.peek() != '\n') {
+    while(is.peek() != ',' and is.peek() != '\n' and is.peek() != -1) {
+        // std::cout << (char)is.peek() << std::endl;
         tag += is.get();
     }
 

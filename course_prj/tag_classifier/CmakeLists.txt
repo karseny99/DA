@@ -6,3 +6,4 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(course_prj)
 add_executable(main src/main.cpp src/classificator.cpp)
+add_executable(estimator src/estimator.cpp src/classificator.cpp)

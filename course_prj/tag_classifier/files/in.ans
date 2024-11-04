@@ -1,0 +1,9 @@
+11
+sort theorem algorithm counting_sort proof tree balanced_tree avl-tree rbtree string suffix_tree
+6
+rbtree, tree, balanced_tree
+rbtree, tree, balanced_tree, avl-tree
+sort, counting_sort, algorithm
+tree, balanced_tree, avl-tree, rbtree
+string, algorithm
+theorem, proof, tree, suffix_tree
