@@ -2,6 +2,6 @@
 tree, balanced_tree, rbtree
 tree, balanced_tree, rbtree
 sort, counting_sort
-balanced_tree, avl-tree, suffix_tree
+balanced_tree, avl-tree
 theorem, algorithm, string
 suffix_tree

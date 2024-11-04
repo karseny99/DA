@@ -12,7 +12,7 @@ void learn(std::ifstream& is, std::ofstream& os) {
 
         std::vector<std::string> tags;
         while(1) {
-            std::string tag = BayesClassificator::readTag(is >> std::ws);
+            std::string tag = tools::readWord(is >> std::ws);
             tags.emplace_back(tag);
             
             if(is.peek() == ',') is.get();
@@ -25,7 +25,7 @@ void learn(std::ifstream& is, std::ofstream& os) {
             getline(is, currentString);
 
             std::stringstream currentStrBuf{currentString};
-            while(currentStrBuf >> word) text.emplace_back(BayesClassificator::normalize(word));
+            while(currentStrBuf >> word) text.emplace_back(tools::normalize(word));
         }
 
         btc.fit(tags, text);
@@ -49,7 +49,7 @@ void classify(std::ifstream& is, std::ifstream& stats, std::ofstream& os) {
             std::string currentString, word;
             getline(is, currentString);
             std::stringstream currentStrBuf{currentString};
-            while(currentStrBuf >> word) text.emplace_back(BayesClassificator::normalize(word));
+            while(currentStrBuf >> word) text.emplace_back(tools::normalize(word));
         }
         predictions.emplace_back(std::move(btc.predict(text)));
     }

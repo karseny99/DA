@@ -117,24 +117,24 @@ std::vector<std::pair<std::string, double>> BayesClassificator::BayesTagClassifi
     std::vector<std::pair<std::string, double>> predicted;
 
     for(auto& [tagName, prob] : tagsProbs) {
-        if(prob > 1.0 / fittedTags.size())
+        if(prob > 1.5 / fittedTags.size())
             predicted.emplace_back(tagName, prob);
     }
 
     return predicted;
 }
 
-std::string BayesClassificator::readTag(std::istream& is) {
+std::string tools::readWord(std::istream& is) {
     std::string tag;
     while(is.peek() != ',' and is.peek() != '\n' and is.peek() != -1) {
         // std::cout << (char)is.peek() << std::endl;
         tag += is.get();
     }
 
-    return BayesClassificator::normalize(tag);
+    return tools::normalize(tag);
 }
 
-std::string& BayesClassificator::normalize(std::string& s) {
+std::string& tools::normalize(std::string& s) {
     for(size_t i{0}; i < s.size(); ++i) {
         if('A' <= s[i] and s[i] <= 'Z') 
             s[i] = (s[i] - 'A' + 'a');

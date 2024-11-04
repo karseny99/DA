@@ -148,7 +148,7 @@ int main(int argc, char** argv) {
     for(size_t line{0}; line < numOfLines; ++line) {
 
         while(1) {
-            std::string className = BayesClassificator::readTag(isAns >> std::ws);
+            std::string className = tools::readWord(isAns >> std::ws);
             answer[line].insert(className);
             if(isAns.peek() == ',') isAns.get();
             if(isAns.eof() or isAns.peek() == '\n') {isAns.get(); break;}
@@ -173,7 +173,7 @@ int main(int argc, char** argv) {
     for(size_t line{0}; line < numOfLines; ++line) {
 
         while(1) {
-            std::string className = BayesClassificator::readTag(isPred >> std::ws);
+            std::string className = tools::readWord(isPred >> std::ws);
             prediction[line].insert(className);
             
             if(isPred.peek() == ',') isPred.get();

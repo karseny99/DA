@@ -5,6 +5,12 @@
 #include <unordered_map>
 #include <cmath>
 
+namespace tools {
+    std::string readWord(std::istream& is);
+
+    std::string& normalize(std::string& s);
+}
+
 namespace BayesClassificator {
 
 class BayesTagClassificator {
@@ -62,9 +68,5 @@ public:
 std::ifstream& operator>>(std::ifstream& is, BayesClassificator::BayesTagClassificator& btc);
 
 std::vector<std::pair<std::string, double>>& softmax(std::vector<std::pair<std::string, double>>& arr);
-
-std::string readTag(std::istream& is);
-
-std::string& normalize(std::string& s);
 
 }
