@@ -29,6 +29,11 @@ private:
     std::unordered_map<std::string, double> precisions;
     std::unordered_map<std::string, double> recalls;
 
+    double precisionMacroAveraging = 0;
+    double recallMacroAveraging = 0;
+
+    std::vector<std::pair<std::string, std::pair<double, double>>> metrics;
+
 public:
 
     estimator(std::vector<std::unordered_set<std::string>>& _answer, 
@@ -41,29 +46,39 @@ public:
         assert(_answer.size() == _prediction.size());
     }
 
-    /* 
-        return pair<precision, recall>, 
-        metrics are macro-averaged: useful if distinctClasses are disbalanced
-    */
-    std::pair<double, double> getTotalMetrics() {
-
-        // computing precisions and recall for distinct distinctClasses
-        getMetricsForEach();
-
-        double precisionMacroAveraging = 0;
-        double recallMacroAveraging = 0;
+    void estimate() {
+        computeMetricsForEach();
 
         for(const std::string& cls : distinctClasses) {
             precisionMacroAveraging += precisions[cls];
             recallMacroAveraging += recalls[cls];
+
+            metrics.push_back({cls, {precisions[cls], recalls[cls]}});
         }
 
-        return {precisionMacroAveraging / distinctClasses.size(), recallMacroAveraging / distinctClasses.size()};
+        precisionMacroAveraging /= static_cast<double>(distinctClasses.size());
+        recallMacroAveraging /= static_cast<double>(distinctClasses.size());
+    }
+
+    /* 
+        functions precision() & recall() returns macro-averaged metrics
+        They are suits if distinctClasses are disbalanced
+    */
+    double precision() const {
+        return precisionMacroAveraging;
+    }
+
+    double recall() const {
+        return recallMacroAveraging;
+    }
+
+    const std::vector<std::pair<std::string, std::pair<double, double>>>& metricsForEach() const {
+        return metrics;
     }
 
 private:
 
-    void getMetricsForEach() {
+    void computeMetricsForEach() {
         getStatsForClass();
 
         for(const std::string& cls : distinctClasses) {
@@ -167,7 +182,19 @@ int main(int argc, char** argv) {
 
     }
     metrics::estimator estimator(answer, prediction, distinctClasses);
-    auto [precision, recall] = estimator.getTotalMetrics();
 
-    std::cout << precision << ' ' << recall << std::endl;
+    estimator.estimate();
+
+    double precision = estimator.precision();
+    double recall = estimator.recall();
+    std::cout << "===============\n";
+    std::cout << "AveragePrecision: " << precision << '\n' << "AverageRecall: " << recall << std::endl;
+
+    auto metricsForEach = estimator.metricsForEach();
+    for(const auto& elem : metricsForEach) {
+        std::cout << "================\n";
+        std::cout << "Class name: " << elem.first << std::endl;
+        std::cout << "Precision: " << elem.second.first << ' ' << "Recall: " << elem.second.second << std::endl;
+    }
+    
 }
