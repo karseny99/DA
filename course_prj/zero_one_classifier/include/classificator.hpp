@@ -2,7 +2,7 @@
 #include <vector>
 #include <sstream>
 #include <unordered_map>
-
+#include <cmath>
 
 namespace BayesClassificator {
 
@@ -22,7 +22,9 @@ private:
     int docWordCount = 0;
     int notDocWordCount = 0;
 
-    double probabilityDoc = 0.5;
+    int docsEntries = 0;
+    int notDocEntries = 0;
+
 public:
 
     classType predict(const text_t& text);

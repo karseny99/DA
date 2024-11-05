@@ -2,6 +2,7 @@
 
 
 
+
 void BayesClassificator::GaussianNaiveBayes::fit(classType type, const text_t& text) {
 
     if(type == classType::DOCUMENT) {
@@ -12,6 +13,8 @@ void BayesClassificator::GaussianNaiveBayes::fit(classType type, const text_t& t
             ++freqDoc[word];
         }
 
+        ++docsEntries;
+
     } else {
 
         notDocWordCount += text.size();
@@ -20,6 +23,7 @@ void BayesClassificator::GaussianNaiveBayes::fit(classType type, const text_t& t
             ++freqNotDoc[word];
         }
 
+        ++notDocEntries;
     }
 
 }
@@ -27,19 +31,19 @@ void BayesClassificator::GaussianNaiveBayes::fit(classType type, const text_t& t
 
 BayesClassificator::classType BayesClassificator::GaussianNaiveBayes::predict(const text_t& text) {
     // calc doc probability
-    double probDoc = probabilityDoc;
+    double probDoc = log(docsEntries / static_cast<double>(docsEntries + notDocEntries));
 
     for(const std::string& word : text) {
-        probDoc *= (freqDoc[word] + 1);
-        probDoc /= docWordCount;
+        probDoc += log(freqDoc[word] + 1e-6);
+        probDoc -= log(docWordCount);
     }
 
     // calc notDoc prob 
-    double probNotDoc = probabilityDoc;
+    double probNotDoc = (notDocEntries / static_cast<double>(docsEntries + notDocEntries));
 
     for(const std::string& word : text) {
-        probNotDoc *= (freqNotDoc[word] + 1);
-        probNotDoc /= docWordCount;
+        probNotDoc += log(freqNotDoc[word] + 1e-6);
+        probNotDoc -= log(notDocWordCount);
     }
 
     return (probDoc >= probNotDoc) ? BayesClassificator::classType::DOCUMENT : BayesClassificator::classType::NOT_DOCUMENT;
