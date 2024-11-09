@@ -73,7 +73,7 @@ BayesClassificator::classType BayesClassificator::GaussianNaiveBayes::predict(co
     }
 
     // calc notDoc prob 
-    double probNotDoc = (notDocEntries / static_cast<double>(docsEntries + notDocEntries));
+    double probNotDoc = log(notDocEntries / static_cast<double>(docsEntries + notDocEntries));
 
     for(const std::string& word : text) {
         probNotDoc += log(freqNotDoc[word] + 1e-6);

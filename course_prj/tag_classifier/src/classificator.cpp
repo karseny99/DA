@@ -83,7 +83,7 @@ std::unordered_map<std::string, size_t> BayesClassificator::BayesTagClassificato
         ++freqDict[word];
         wordEntries[word] = true;
     }
-    
+
     return freqDict;
 }
 
@@ -102,11 +102,7 @@ std::vector<std::pair<std::string, double>> BayesClassificator::BayesTagClassifi
 
     for(auto [tagName, tagInfo] : fittedTags) {
         double tagLogProb = log(tagInfo.tagEntry) - log(trials); 
-        // double tagLogProb = tagInfo.tagEntry / static_cast<double>(fittedTags.size()); 
-        // std::cout << tagName << ' ' << tagLogProb << std::endl;
         for(const std::string& word : text) {
-            // tagLogProb *= (tagInfo.freq[word] + 1) ;
-            // tagLogProb /= static_cast<double>(tagInfo.wordsUnderTag);
             tagLogProb += log(tagInfo.freq[word] + 1) - log(tagInfo.wordsUnderTag + 1 * uniqueWordsCount());
         }
 
@@ -126,10 +122,9 @@ std::vector<std::pair<std::string, double>> BayesClassificator::BayesTagClassifi
 
 std::string tools::readWord(std::istream& is) {
     std::string tag;
-    while(is.peek() != ',' and is.peek() != '\n' and is.peek() != -1) {
-        // std::cout << (char)is.peek() << std::endl;
+    while(is.peek() != ',' and is.peek() != '\n' and is.peek() != -1) 
         tag += is.get();
-    }
+    
 
     return tools::normalize(tag);
 }
